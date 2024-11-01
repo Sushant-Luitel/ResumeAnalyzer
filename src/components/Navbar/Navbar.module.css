@@ -10,9 +10,22 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+}
+
+.left {
+  padding-top: 0.9rem;
+  padding-inline: 2rem;
+}
+
+.logo {
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  color: white;
+  font-weight: 700;
+}
+
+.right {
   padding-right: 5rem;
-  padding-left: 1rem;
 }
 
 .navbar-links {
@@ -25,6 +38,11 @@
   font-size: 1.15rem;
   color: white;
   cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.navbar-links li:hover {
+  opacity: 0.7;
 }
 
 .navbar-links li {

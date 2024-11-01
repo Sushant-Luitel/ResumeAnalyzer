@@ -3,7 +3,9 @@ const Navbar = () => {
   return (
     <div className={styles["navbar"]}>
       <div className={styles["navbar-container"]}>
-        <div className={styles["left"]}>Resume Analyzer</div>
+        <div className={styles["left"]}>
+          <span className={styles["logo"]}>Resume Analyzer</span>
+        </div>
         <div className={styles["right"]}>
           <ul className={styles["navbar-links"]}>
             <li>Home</li>
