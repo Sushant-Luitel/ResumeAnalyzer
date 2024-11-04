@@ -1,7 +1,8 @@
 .navbar {
-  background: teal;
-
+  min-height: 55px;
+  background-color: teal;
   position: fixed;
+  top: 0;
   left: 0;
   right: 0;
 }
@@ -13,7 +14,8 @@
 }
 
 .left {
-  padding-top: 0.9rem;
+  display: flex;
+  align-items: center;
   padding-inline: 2rem;
 }
 
