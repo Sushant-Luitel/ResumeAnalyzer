@@ -38,3 +38,9 @@
   font-weight: 400;
   color: #fff;
 }
+
+.file-preview {
+  width: 400px;
+  height: 400px;
+  object-fit: contain;
+}
