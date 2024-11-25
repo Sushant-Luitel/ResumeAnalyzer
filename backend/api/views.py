@@ -1,5 +1,4 @@
 from rest_framework.decorators import api_view,permission_classes
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,7 +10,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
 
 @api_view(['GET','POST'])
-
 def home(request):
     return Response("hpa", status=status.HTTP_200_OK)
 
@@ -32,7 +30,7 @@ def login(request):
         password=request.data.get('password')
         user=None
         try:
-            user=CustomUser.objects.get('username')
+            user=CustomUser.objects.get(username=username)
         except Exception as e:
             return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if not user:
