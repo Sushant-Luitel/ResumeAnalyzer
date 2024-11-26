@@ -50,5 +50,13 @@ def logout(request):
         except Exception as e:
             return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-def test(request):
-    pass
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def file(request):
+    username=request.user.username
+    if request.method=="GET":
+        user=CustomUser.objects.get(username=username)
+        serializer=FileSerializer(data=request.data)
+        #to do
+        
