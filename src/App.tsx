@@ -1,12 +1,20 @@
+import { Route, Routes } from "react-router";
 import "./App.css";
 import Navbar from "./components/Navbar/Navbar";
-import ResumeUpload from "./components/ResumeUpload/ResumeUpload";
+import { BrowserRouter } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./components/auth/Login";
 
 function App() {
   return (
     <>
       <Navbar />
-      <ResumeUpload />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }
