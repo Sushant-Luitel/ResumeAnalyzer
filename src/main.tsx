@@ -1,21 +1,12 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Auth0Provider } from "@auth0/auth0-react";
 import App from "./App.tsx";
-import { BrowserRouter } from "react-router-dom";
+import { MantineProvider } from "@mantine/core";
+import AuthProvider from "./context/authContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Auth0Provider
-      domain="dev-2r7ax5l1lcfww1nw.us.auth0.com"
-      clientId="UWwvv6koMqwgglv6VfFuMmy3BSlDva3Y"
-      authorizationParams={{
-        redirect_uri: window.location.origin,
-      }}
-    >
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </Auth0Provider>
-  </StrictMode>
+  <MantineProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </MantineProvider>
 );
