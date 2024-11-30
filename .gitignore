@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 env
 backend/backend/__pycache__
-backend/profile
 backend/db.sqlite3
 backend/api/__pycache__
+backend/api/migrations/__pycache__
