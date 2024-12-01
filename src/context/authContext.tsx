@@ -5,11 +5,11 @@ const AuthContext = createContext<any>(null);
 
 const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("site") || "");
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
   const navigate = useNavigate();
   const loginAction = async (data: any) => {
     try {
-      const response = await fetch("your-api-endpoint/auth/login", {
+      const response = await fetch("http://127.0.0.1:8000/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,7 +20,7 @@ const AuthProvider = ({ children }: any) => {
       if (res.data) {
         setUser(res.data.user);
         setToken(res.token);
-        localStorage.setItem("site", res.token);
+        localStorage.setItem("token", res.token);
         navigate("/dashboard");
         return;
       }
