@@ -1,36 +1,100 @@
 import { Box } from "@mantine/core";
 import styles from "./login.module.css";
 import { Link } from "react-router-dom";
-const Login = () => (
-  <Box className={styles["main-wrapper"]}>
-    <Box className={styles["wrapper"]}>
-      <form action="">
-        <h1>Login</h1>
-        <Box className={styles["input-box"]}>
-          <input type="text" placeholder="Username" required />
-        </Box>
-        <Box className={styles["input-box"]}>
-          <input type="password" placeholder="Password" required />
-        </Box>
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+import EyeIcon from "../../assets/svgs/EyeIcon";
+import EyeCloseIcon from "../../assets/svgs/EyeCloseIcon";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { loginSchema } from "./LoginSchema";
 
-        <Box className={styles["remember-forgot"]}>
-          <label>
-            <input type="checkbox" />
-            Remember Me
-          </label>
-          <a href="#">Forgot Password</a>
-        </Box>
-        <button type="submit" className={styles["btn"]}>
-          Login
-        </button>
-        <Box className={styles["register-link"]}>
-          <p>
-            Dont have an account? <Link to={"/register"}>Register</Link>
-          </p>
-        </Box>
-      </form>
+type userType = {
+  userName: string;
+  password: string;
+};
+
+const Login = () => {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(loginSchema) });
+
+  const { mutate } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: async (newData: userType) => {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/login/",
+        newData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    },
+  });
+
+  const onSubmit = (data: any) => {
+    mutate(data);
+    console.log(data, "data");
+  };
+
+  return (
+    <Box className={styles["main-wrapper"]}>
+      <Box className={styles["wrapper"]}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <h1>Login</h1>
+          <Box className={styles["input-box"]}>
+            <input
+              type="text"
+              placeholder="UserName"
+              {...register("userName")}
+            />
+          </Box>
+          {errors.userName && (
+            <p className="error-message">{errors.userName.message}</p>
+          )}
+          <Box pos={"relative"}>
+            <Box className={styles["input-box"]}>
+              <input
+                type="password"
+                placeholder="Password"
+                {...register("password")}
+              />
+            </Box>
+            <Box
+              style={{
+                cursor: "pointer",
+                position: "absolute",
+                right: "20px",
+                top: "18px",
+              }}
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <EyeIcon /> : <EyeCloseIcon />}
+            </Box>
+          </Box>
+          {errors.password && (
+            <p className="error-message">{errors.password.message}</p>
+          )}
+          <button type="submit" className={styles["btn"]}>
+            Login
+          </button>
+          <Box className={styles["register-link"]}>
+            <p>
+              Dont have an account? <Link to={"/register"}>Register</Link>
+            </p>
+          </Box>
+        </form>
+      </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 export default Login;

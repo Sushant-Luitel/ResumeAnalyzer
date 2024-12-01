@@ -12,3 +12,13 @@ body {
 h1 {
   color: #fff;
 }
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin-top: 10px;
+  font-weight: 500;
+  line-height: 100%;
+  margin-bottom: 0;
+  margin-left: 15px;
+}
