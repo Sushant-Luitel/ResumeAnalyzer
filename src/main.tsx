@@ -1,12 +1,14 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { MantineProvider } from "@mantine/core";
-import AuthProvider from "./context/authContext.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <MantineProvider>
-    <AuthProvider>
+    <QueryClientProvider client={queryClient}>
       <App />
-    </AuthProvider>
+    </QueryClientProvider>
   </MantineProvider>
 );
