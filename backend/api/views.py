@@ -58,5 +58,5 @@ def file(request):
     if request.method=="GET":
         user=CustomUser.objects.get(username=username)
         serializer=FileSerializer(data=request.data)
-        #to do
+        
         
