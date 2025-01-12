@@ -1,3 +1,5 @@
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import { useContext, createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,28 +9,24 @@ const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const navigate = useNavigate();
-  const loginAction = async (data: any) => {
-    try {
-      const response = await fetch("http://127.0.0.1:8000/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      const res = await response.json();
-      if (res.data) {
-        setUser(res.data.user);
-        setToken(res.token);
-        localStorage.setItem("token", res.token);
-        navigate("/dashboard");
-        return;
-      }
-      throw new Error(res.message);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
+  const { mutate: login } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: async (loginCredentials: any) => {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/login/",
+        loginCredentials,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    },
+    onSuccess: (res) => {
+      console.log("res", res);
+    },
+  });
 
   const logOut = () => {
     setUser(null);
@@ -38,7 +36,7 @@ const AuthProvider = ({ children }: any) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, loginAction, logOut }}>
+    <AuthContext.Provider value={{ token, user, setUser, logOut, login }}>
       {children}
     </AuthContext.Provider>
   );

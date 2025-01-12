@@ -9,6 +9,7 @@ import EyeIcon from "../../assets/svgs/EyeIcon";
 import EyeCloseIcon from "../../assets/svgs/EyeCloseIcon";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "./LoginSchema";
+import { useAuth } from "../../context/authContext";
 
 type userType = {
   userName: string;
@@ -17,31 +18,15 @@ type userType = {
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-
+  const { login } = useAuth();
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm({ resolver: yupResolver(loginSchema) });
 
-  const { mutate } = useMutation({
-    mutationKey: ["login"],
-    mutationFn: async (newData: userType) => {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/login/",
-        newData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    },
-  });
-
   const onSubmit = (data: any) => {
-    mutate(data);
+    login(data);
     console.log(data, "data");
   };
 
