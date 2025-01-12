@@ -28,12 +28,12 @@ def login(request):
     if request.method=="POST":
         username=request.data.get('username')
         password=request.data.get('password')
-        user=None
+        print(username)
         try:
             user=CustomUser.objects.get(username=username)
         except Exception as e:
             return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if not user:
+        if not user and not password:
             user = authenticate(username=username,password=password)
         if user:
             token,_ = Token.objects.get_or_create(user=user)
@@ -58,5 +58,5 @@ def file(request):
     if request.method=="GET":
         user=CustomUser.objects.get(username=username)
         serializer=FileSerializer(data=request.data)
-        
+        pass
         
