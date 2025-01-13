@@ -46,10 +46,13 @@ const Register = () => {
     useState<boolean>(false);
 
   const onSubmit: SubmitHandler<UserRegistration> = (data: any) => {
-    mutate(data);
-    console.log(data, "data");
-    console.log("form submitted");
-    console.log(errors, "errors");
+    const updatedUserData = {
+      ...data,
+      username: data.userName,
+    };
+    delete updatedUserData.userName;
+
+    mutate(updatedUserData);
   };
 
   return (
@@ -84,7 +87,7 @@ const Register = () => {
             <InputField
               type="text"
               placeholder="Username"
-              name="username"
+              name="userName"
               clearErrors={clearErrors}
               register={register}
             />
