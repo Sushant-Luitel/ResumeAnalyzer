@@ -2,10 +2,11 @@ import { Route, Routes } from "react-router";
 import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 import Home from "./pages/Home";
-import Login from "./components/auth/Login";
+import Login from "./components/auth/Login/Login";
 import AuthProvider from "./context/authContext";
-import Register from "./components/auth/Register";
+import Register from "./components/auth/Register/Register";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               }
             />
           </Routes>
+          <ToastContainer autoClose={2000} />
         </AuthProvider>
       </BrowserRouter>
     </>

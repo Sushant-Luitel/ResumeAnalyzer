@@ -1,15 +1,14 @@
 import { Box } from "@mantine/core";
 import styles from "./login.module.css";
 import { Link } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import EyeIcon from "../../assets/svgs/EyeIcon";
-import EyeCloseIcon from "../../assets/svgs/EyeCloseIcon";
+import EyeIcon from "../../../assets/svgs/EyeIcon";
+import EyeCloseIcon from "../../../assets/svgs/EyeCloseIcon";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "./LoginSchema";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "../../../context/authContext";
 
 type userType = {
   userName: string;
@@ -25,7 +24,7 @@ const Login = () => {
     formState: { errors },
   } = useForm({ resolver: yupResolver(loginSchema) });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: userType) => {
     login({
       username: data.userName,
       password: data.password,

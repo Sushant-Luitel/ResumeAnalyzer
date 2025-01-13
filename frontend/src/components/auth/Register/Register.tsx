@@ -5,14 +5,14 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registrationSchema } from "./RegistrationSchema";
 import * as yup from "yup";
-import InputField from "../reusable/InputField";
-import EyeIcon from "../../assets/svgs/EyeIcon";
+import InputField from "../../reusable/InputField";
+import EyeIcon from "../../../assets/svgs/EyeIcon";
 import { useState } from "react";
-import EyeCloseIcon from "../../assets/svgs/EyeCloseIcon";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import EyeCloseIcon from "../../../assets/svgs/EyeCloseIcon";
 
-type UserRegistration = yup.InferType<typeof registrationSchema>;
+import { useAuth } from "../../../context/authContext";
+
+export type UserRegistration = yup.InferType<typeof registrationSchema>;
 
 const Register = () => {
   const {
@@ -25,21 +25,7 @@ const Register = () => {
     mode: "onBlur",
   });
 
-  const { mutate } = useMutation({
-    mutationKey: ["register"],
-    mutationFn: async (newData: UserRegistration) => {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/register/",
-        newData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    },
-  });
+  const { registerUser } = useAuth();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -52,7 +38,7 @@ const Register = () => {
     };
     delete updatedUserData.userName;
 
-    mutate(updatedUserData);
+    registerUser(updatedUserData);
   };
 
   return (
