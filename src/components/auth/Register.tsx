@@ -84,7 +84,7 @@ const Register = () => {
             <InputField
               type="text"
               placeholder="Username"
-              name="userName"
+              name="username"
               clearErrors={clearErrors}
               register={register}
             />

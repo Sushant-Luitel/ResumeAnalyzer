@@ -15,23 +15,26 @@ const AuthProvider = ({ children }: any) => {
     mutationFn: async (loginCredentials: any) => {
       const response = await axios.post(
         "http://127.0.0.1:8000/login/",
-        loginCredentials,
+        { ...loginCredentials },
         {
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
+      return response.data;
     },
     onSuccess: (res) => {
-      console.log("res", res);
+      setToken(res.token);
+      localStorage.setItem("token", res.token);
+      navigate("/");
     },
   });
 
   const logOut = () => {
     setUser(null);
     setToken("");
-    localStorage.removeItem("site");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
