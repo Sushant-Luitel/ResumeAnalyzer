@@ -26,7 +26,10 @@ const Login = () => {
   } = useForm({ resolver: yupResolver(loginSchema) });
 
   const onSubmit = (data: any) => {
-    login(data);
+    login({
+      username: data.userName,
+      password: data.password,
+    });
     console.log(data, "data");
   };
 
@@ -48,7 +51,7 @@ const Login = () => {
           <Box pos={"relative"}>
             <Box className={styles["input-box"]}>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 {...register("password")}
               />
