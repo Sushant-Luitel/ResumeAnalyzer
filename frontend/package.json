@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^3.9.1",
     "@mantine/core": "^7.14.3",
     "@mantine/hooks": "^7.14.3",
+    "@mantine/notifications": "^7.15.3",
     "@tanstack/react-query": "^5.62.0",
     "axios": "^1.7.8",
     "react": "^18.3.1",
@@ -22,6 +23,7 @@
     "react-hook-form": "^7.53.2",
     "react-router": "^6.27.0",
     "react-router-dom": "^6.27.0",
+    "react-toastify": "^11.0.2",
     "yup": "^1.4.0"
   },
   "devDependencies": {
