@@ -23,23 +23,30 @@ def register_user(request):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
+
 @api_view(['POST'])
 def login(request):
-    if request.method=="POST":
-        username=request.data.get('username')
-        password=request.data.get('password')
-        print(username)
-        try:
-            user=CustomUser.objects.get(username=username)
-        except Exception as e:
-            return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if not user and not password:
-            user = authenticate(username=username,password=password)
-        if user:
-            token,_ = Token.objects.get_or_create(user=user)
-            return Response({'token':token.key},status=status.HTTP_200_OK)
-        return Response({'error':'Invalid username or password'},status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == "POST":
+        username = request.data.get('username')
+        password = request.data.get('password')
+        # Ensure username and password are provided
+        if not username or not password:
+            return Response({"error": "Username and Password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+
+        # Check if authentication failed
+        if user is None:
+            return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # If user is authenticated, create or get the token
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({"token": token.key}, status=status.HTTP_200_OK)
     
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):

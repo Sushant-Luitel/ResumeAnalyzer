@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'corsheaders',
+
 ]
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -62,7 +62,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS=['http://127.0.0.1:8000']
+CORS_ALLOWED_ORIGINS=['http://127.0.0.1:8000','http://localhost:5173']
 AUTH_USER_MODEL = 'api.CustomUser' #registering custom user model
 
 ROOT_URLCONF = 'backend.urls'
