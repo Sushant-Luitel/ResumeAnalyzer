@@ -1,0 +1,53 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+backend/backend/__pycache__
+*.sqlite3
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+*.egg-info/
+
+# Django
+db.sqlite3
+/media/
+staticfiles/
+
+# Logs
+*.log
+
+# Security
+.env
+secrets.json
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+build/
+dist/
+.DS_Store
+
+# System Files
+Thumbs.db
+.idea/
+.vscode/
+*.bak
+
+
+ IDE/Editor configurations
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# OS-specific
+.DS_Store
+Thumbs.db
