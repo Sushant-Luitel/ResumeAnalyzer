@@ -4,10 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CustomUserSerializer,FileSerializer
 from rest_framework.authtoken.models import Token
-
-from .models import CustomUser
+from django.shortcuts import get_object_or_404
+from .models import CustomUser, FileUpload
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
+
+import pypdf
+from pypdf import PdfReader
 
 @api_view(['GET','POST'])
 def home(request):
@@ -58,12 +61,44 @@ def logout(request):
             return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def file(request):
-    username=request.user.username
-    if request.method=="GET":
-        user=CustomUser.objects.get(username=username)
-        serializer=FileSerializer(data=request.data)
-        pass
+def file_upload(request):
+    if request.user:
+        serializer = FileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+@api_view(['GET', 'POST'])
+def file_text(request, username):
+    try:
+        user = CustomUser.objects.get(username=username)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    if user:
+        print(user.username)
+    else:
+        print("User has no first name")
+    file = FileUpload.objects.filter(user=user)
+    
+
+    try:
+        print(file.values)
+        # Initialize PdfReader with the uploaded file
+        reader = PdfReader(file)
+        print(reader)
+        # Get the number of pages in the PDF
+        total_pages = len(reader.pages)
+        print(f"Total pages: {total_pages}")
+
+        # Extract text from the first page
+        first_page = reader.pages[0]
+        text = first_page.extract_text()
+        # Print and return extracted text
+        print(text)
+        return Response({"text": text}, status=200)
+
+    except Exception as e:
+        return Response({"error": f"File processing error: {str(e)}"}, status=500)
