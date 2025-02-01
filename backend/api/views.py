@@ -9,6 +9,7 @@ from .models import CustomUser, FileUpload
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
 
+from django.middleware.csrf import get_token
 # import pypdf
 from PyPDF2 import PdfReader
 
@@ -34,6 +35,7 @@ def login(request):
     if request.method == "POST":
         username = request.data.get('username')
         password = request.data.get('password')
+        csrf_token = get_token(request)
         # Ensure username and password are provided
         if not username or not password:
             return Response({"error": "Username and Password are required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -48,7 +50,7 @@ def login(request):
         # If user is authenticated, create or get the token
         token, created = Token.objects.get_or_create(user=user)
 
-        return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response({"token": token.key,'csrfToken': csrf_token,}, status=status.HTTP_200_OK)
     
 
 
@@ -63,13 +65,19 @@ def logout(request):
             return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
 @permission_classes([IsAuthenticated])
 def file_upload(request):
     if request.user:
+        
         serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
+            context={
+                'message': 'File uploaded successfully!'
+            }
+            return JsonResponse(context, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
