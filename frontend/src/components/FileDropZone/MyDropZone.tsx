@@ -1,68 +1,128 @@
-import { useCallback, useState } from "react";
+import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import styles from "./MyDropZone.module.css";
-import cloudUpload from "../../assets/cloud-sm.png";
+import pdfLogo from "../../assets/pdf.png";
+import clsx from "clsx";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
-function MyDropzone() {
-  const [files, setFiles] = useState<any>([]);
+interface FileData {
+  file: File;
+  preview: string;
+}
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      setFiles(
-        acceptedFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        )
-      );
-    },
+const MyDropZone: React.FC = () => {
+  const [files, setFiles] = useState<FileData[]>([]);
+  const [error, setError] = useState<string>("");
+
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+  const acceptedFormats = {
+    "application/pdf": [".pdf"],
+  };
+
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any) => {
+    setError("");
+
+    if (rejectedFiles.length > 0) {
+      setError("File exceeds size limit of 2MB or unsupported format.");
+      return;
+    }
+
+    const newFiles = acceptedFiles.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  }, []);
+
+  console.log(files, "files");
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: acceptedFormats,
+    maxSize: MAX_FILE_SIZE,
   });
 
-  if (files.length > 0) console.log(files, "files");
+  const removeFile = () => {
+    setFiles([]);
+  };
+
+  const { mutate: uploadFile } = useMutation({
+    mutationKey: ["register"],
+    mutationFn: async (newFile: FileData[]) => {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/file/",
+        newFile,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {},
+  });
 
   return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
-      {files.length > 0 ? (
-        <div>
-          <img
-            src={files[0]?.preview}
-            className={styles["file-preview"]}
-            alt=""
-          />
-        </div>
-      ) : isDragActive ? (
-        <div className={styles["file-upload-outer-box"]}>
-          <div className={styles["file-upload-inner-box"]}>
-            <img
-              src={cloudUpload}
-              className={styles["file-upload-image"]}
-              alt=""
-            />
-            <p className={styles["file-upload-text"]}>drop your file here...</p>
+    <div>
+      <div
+        {...getRootProps()}
+        className={clsx(
+          " p-12 flex justify-center bg-white border border-dashed border-gray-300 rounded-xl ",
+          files.length > 0
+            ? "pointer-events-none opacity-80 "
+            : "cursor-pointer "
+        )}
+      >
+        <input {...getInputProps()} />
+        <div className="text-center">
+          <span className="inline-flex justify-center items-center size-16 bg-gray-100 text-gray-800 rounded-full">
+            📁
+          </span>
+          <div className="mt-4 text-sm text-gray-600">
+            <span className="font-medium text-gray-800">
+              Drop your file here or{" "}
+            </span>
+            <span className="text-blue-600 font-semibold cursor-pointer">
+              browse
+            </span>
           </div>
+          <p className="mt-1 text-xs text-gray-400">Pick a file up to 2MB.</p>
         </div>
-      ) : (
-        <div className={styles["file-upload-outer-box"]}>
-          <div className={styles["file-upload-inner-box"]}>
-            <img
-              src={cloudUpload}
-              className={styles["file-upload-image"]}
-              alt=""
-            />
-            <button
-              className={`${styles["file-upload-button"]} ${styles["button"]}`}
-            >
-              Upload Your Resume
-            </button>
-            <p className={styles["file-upload-text"]}>
-              or drop a text file here
-            </p>
+      </div>
+
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+      {files.length > 0 && (
+        <>
+          <div className="mt-4 space-y-2">
+            <div className="p-3 bg-white border border-gray-300 rounded-xl flex items-center gap-x-3">
+              <img src={pdfLogo} alt="preview" className="size-10 rounded-lg" />
+              <p className="text-sm font-medium text-gray-800">
+                {files[0]?.file?.name}
+              </p>
+              <p className="text-xs text-gray-500">
+                {(files[0]?.file?.size / 1024).toFixed(2)} KB
+              </p>
+              <button
+                onClick={removeFile}
+                className="text-red-500 hover:text-red-700 focus:outline-none cursor-pointer"
+              >
+                ❌
+              </button>
+            </div>
           </div>
-        </div>
+          <button
+            type="button"
+            className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-teal-500 text-teal-500 hover:border-teal-400 hover:text-teal-400 focus:outline-none focus:border-teal-400 focus:text-teal-400 disabled:opacity-50 disabled:pointer-events-none"
+            onClick={() => uploadFile([files?.[0]])}
+          >
+            Analayze My Resume
+          </button>
+        </>
       )}
     </div>
   );
-}
+};
 
-export default MyDropzone;
+export default MyDropZone;
