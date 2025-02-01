@@ -17,6 +17,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
-        model=FileUpload
-        fields=['file','upload_time']
+        model = FileUpload
+        fields = ['file']  # Do not include 'user' field
+
+    def create(self, validated_data):
+        user = self.context['user']  # Get user from context
+        return FileUpload.objects.create(user=user, **validated_data)
 

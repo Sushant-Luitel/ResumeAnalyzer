@@ -8,8 +8,9 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser, FileUpload
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
-
+from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
+from django.http import JsonResponse
 # import pypdf
 from PyPDF2 import PdfReader
 
@@ -67,18 +68,19 @@ def logout(request):
 
 
 
-@permission_classes([IsAuthenticated])
+@api_view(['POST'])
 def file_upload(request):
-    if request.user:
-        
-        serializer = FileSerializer(data=request.data)
+    if request.user.is_authenticated:
+        # Check if request contains files
+        if 'file' not in request.FILES:
+            return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = FileSerializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
             serializer.save()
-            context={
-                'message': 'File uploaded successfully!'
-            }
-            return JsonResponse(context, status=status.HTTP_201_CREATED)
+            return JsonResponse({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
+        print(serializer.errors)  # Log errors for debugging
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET', 'POST'])
 def file_text(request, username):
