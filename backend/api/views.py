@@ -9,8 +9,9 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser, FileUpload
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
-
+from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
+from django.http import JsonResponse
 # import pypdf
 from PyPDF2 import PdfReader
 

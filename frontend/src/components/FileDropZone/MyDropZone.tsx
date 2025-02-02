@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { FileRejection } from "react-dropzone";
 import { useDropzone } from "react-dropzone";
 import pdfLogo from "../../assets/pdf.png";
 import clsx from "clsx";
@@ -13,28 +14,28 @@ interface FileData {
 const MyDropZone: React.FC = () => {
   const [files, setFiles] = useState<FileData[]>([]);
   const [error, setError] = useState<string>("");
-
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
   const acceptedFormats = {
     "application/pdf": [".pdf"],
   };
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any) => {
-    setError("");
+  const onDrop = useCallback(
+    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      setError("");
 
-    if (rejectedFiles.length > 0) {
-      setError("File exceeds size limit of 2MB or unsupported format.");
-      return;
-    }
+      if (rejectedFiles.length > 0) {
+        setError("File exceeds size limit of 2MB or unsupported format.");
+        return;
+      }
 
-    const newFiles = acceptedFiles.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  }, []);
-
-  console.log(files, "files");
+      const newFiles = acceptedFiles.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }));
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    },
+    []
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -47,14 +48,23 @@ const MyDropZone: React.FC = () => {
   };
 
   const { mutate: uploadFile } = useMutation({
-    mutationKey: ["register"],
-    mutationFn: async (newFile: FileData[]) => {
+    mutationKey: ["uploadFile"],
+    mutationFn: async (newFile: File) => {
+      if (!newFile) {
+        return;
+      }
+      console.log(newFile, "newFile");
+
+      const formData = new FormData();
+      formData.append("file", newFile);
+      console.log(formData, "formData");
       const response = await axios.post(
         "http://127.0.0.1:8000/file/",
-        newFile,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
+            Authorization: "Basic " + btoa("beast:123456"),
           },
         }
       );
@@ -115,7 +125,7 @@ const MyDropZone: React.FC = () => {
           <button
             type="button"
             className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-teal-500 text-teal-500 hover:border-teal-400 hover:text-teal-400 focus:outline-none focus:border-teal-400 focus:text-teal-400 disabled:opacity-50 disabled:pointer-events-none"
-            onClick={() => uploadFile([files?.[0]])}
+            onClick={() => uploadFile(files[0]?.file)}
           >
             Analayze My Resume
           </button>
