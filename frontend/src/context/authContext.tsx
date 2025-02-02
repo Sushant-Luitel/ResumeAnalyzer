@@ -6,6 +6,8 @@ import { UserRegistration } from "../components/auth/Register/Register";
 import { toast } from "react-toastify";
 
 const notify = () => toast("Registered Successfully!");
+const loginError = () => toast("Invalid Credentials");
+const loginSuccess = () => toast("Invalid Credentials");
 
 type User = {
   username: string;
@@ -54,6 +56,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       notify();
       navigate("/login");
     },
+    onError: () => {},
   });
 
   const { mutate: login } = useMutation({
@@ -75,8 +78,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     onSuccess: (res) => {
       setToken(res.token);
+      loginSuccess();
       localStorage.setItem("token", res.token);
       navigate("/");
+    },
+    onError: () => {
+      loginError();
     },
   });
 
