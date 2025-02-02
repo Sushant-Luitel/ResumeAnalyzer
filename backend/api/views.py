@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -35,6 +36,7 @@ def login(request):
     if request.method == "POST":
         username = request.data.get('username')
         password = request.data.get('password')
+        print(username)
         csrf_token = get_token(request)
         # Ensure username and password are provided
         if not username or not password:
@@ -49,7 +51,7 @@ def login(request):
 
         # If user is authenticated, create or get the token
         token, created = Token.objects.get_or_create(user=user)
-
+        print(token.key)
         return Response({"token": token.key,'csrfToken': csrf_token,}, status=status.HTTP_200_OK)
     
 
@@ -57,28 +59,37 @@ def login(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    if request.method=="POST":
-        try:
-            request.user.auth_token.delete()
-            return Response({'message':'You have been logged out.'},status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    try :
+        print(request.user)
+        token=Token.objects.get(user=request.user)
+        if token:
+            token.delete()
+            return Response({"message":"Logout Success"},status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error":f"Error: {str(e)}"},status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-@permission_classes([IsAuthenticated])
+@api_view(['POST'])
 def file_upload(request):
-    if request.user:
-        
-        serializer = FileSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            context={
-                'message': 'File uploaded successfully!'
-            }
-            return JsonResponse(context, status=status.HTTP_201_CREATED)
+    print(request.headers.get('Authorization'))
+    if request.user.is_authenticated:
+        try:
+            print(request.user)
+            token=Token.objects.get(user=request.user).key
+            print(token)
+            if 'file' not in request.FILES:
+                return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = FileSerializer(data=request.data, context={'user': request.user})
+            if serializer.is_valid():
+                serializer.save()
+                token=Token.objects.get(user=request.user).key
+                print(Token.objects.get(user=request.user).key)
+                return JsonResponse({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer.errors) 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET', 'POST'])
 def file_text(request, username):
