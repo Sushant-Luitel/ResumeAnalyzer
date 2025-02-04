@@ -6,5 +6,5 @@ urlpatterns = [
     path('login/',views.login,name="login"),
     path('logout/',views.logout,name="logout"),
     path('file/',views.file_upload,name="file_upload"),
-    path('file-text/<str:username>',views.file_text,name='file_text'),
+    path('recommend/<str:username>/',views.recommend_jobs,name='recommend'),
 ]
