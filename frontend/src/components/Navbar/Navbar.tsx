@@ -1,13 +1,16 @@
 import { Button } from "@mantine/core";
 import styles from "./Navbar.module.css";
 import { useAuth } from "../../context/authContext";
+import { Link } from "react-router-dom";
 const Navbar = () => {
   const { logOut } = useAuth();
   return (
     <div className={styles["navbar"]}>
       <div className={styles["navbar-container"]}>
         <div className={styles["left"]}>
-          <span className={styles["logo"]}>Resume Analyzer</span>
+          <Link className={styles["logo"]} to={"/"}>
+            Resume Analyzer
+          </Link>
         </div>
         <div className={styles["right"]}>
           <ul className={styles["navbar-links"]}>

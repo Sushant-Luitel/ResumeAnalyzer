@@ -2,23 +2,25 @@ import { useState, useCallback } from "react";
 import { FileRejection } from "react-dropzone";
 import { useDropzone } from "react-dropzone";
 import pdfLogo from "../../assets/pdf.png";
-import clsx from "clsx";
+
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useAuth } from "../../context/authContext";
+import { toast } from "react-toastify";
 
-interface FileData {
+export interface FileData {
   file: File;
   preview: string;
 }
 
 const MyDropZone: React.FC = () => {
-  const [files, setFiles] = useState<FileData[]>([]);
   const [error, setError] = useState<string>("");
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
   const acceptedFormats = {
     "application/pdf": [".pdf"],
   };
+
+  const { files, setFiles } = useAuth();
 
   const { username, password } = useAuth();
 
@@ -35,6 +37,7 @@ const MyDropZone: React.FC = () => {
         file,
         preview: URL.createObjectURL(file),
       }));
+      uploadFile(newFiles[0]?.file);
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     },
     []
@@ -44,13 +47,14 @@ const MyDropZone: React.FC = () => {
     onDrop,
     accept: acceptedFormats,
     maxSize: MAX_FILE_SIZE,
+    disabled: files.length > 0,
   });
 
   const removeFile = () => {
     setFiles([]);
   };
 
-  const { mutate: uploadFile } = useMutation({
+  const { mutate: uploadFile, isPending } = useMutation({
     mutationKey: ["uploadFile"],
     mutationFn: async (newFile: File) => {
       if (!newFile) {
@@ -73,19 +77,16 @@ const MyDropZone: React.FC = () => {
       );
       return response.data;
     },
-    onSuccess: () => {},
+    onSuccess: (res) => {
+      toast.success(res.message);
+    },
   });
-
+  console.log(isPending);
   return (
-    <div>
+    <div className="grid place-items-center gap-10">
       <div
         {...getRootProps()}
-        className={clsx(
-          " p-12 flex justify-center bg-white border border-dashed border-gray-300 rounded-xl ",
-          files.length > 0
-            ? "pointer-events-none opacity-80 "
-            : "cursor-pointer "
-        )}
+        className=" p-12 flex justify-center bg-white border border-dashed border-gray-300 rounded-xl  "
       >
         <input {...getInputProps()} />
         <div className="text-center">
@@ -125,13 +126,6 @@ const MyDropZone: React.FC = () => {
               </button>
             </div>
           </div>
-          <button
-            type="button"
-            className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-teal-500 text-teal-500 hover:border-teal-400 hover:text-teal-400 focus:outline-none focus:border-teal-400 focus:text-teal-400 disabled:opacity-50 disabled:pointer-events-none"
-            onClick={() => uploadFile(files[0]?.file)}
-          >
-            Analayze My Resume
-          </button>
         </>
       )}
     </div>
