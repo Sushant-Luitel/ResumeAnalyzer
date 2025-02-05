@@ -29,7 +29,6 @@ const Login = () => {
       username: data.userName,
       password: data.password,
     });
-    console.log(data, "data");
   };
 
   return (

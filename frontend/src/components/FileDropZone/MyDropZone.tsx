@@ -5,6 +5,7 @@ import pdfLogo from "../../assets/pdf.png";
 import clsx from "clsx";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { useAuth } from "../../context/authContext";
 
 interface FileData {
   file: File;
@@ -18,6 +19,8 @@ const MyDropZone: React.FC = () => {
   const acceptedFormats = {
     "application/pdf": [".pdf"],
   };
+
+  const { username, password } = useAuth();
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -64,7 +67,7 @@ const MyDropZone: React.FC = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: "Basic " + btoa("beast:123456"),
+            Authorization: "Basic " + btoa(`${username}:${password}`),
           },
         }
       );

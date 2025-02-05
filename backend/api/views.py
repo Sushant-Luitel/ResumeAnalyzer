@@ -53,7 +53,7 @@ def login(request):
         # If user is authenticated, create or get the token
         token, created = Token.objects.get_or_create(user=user)
         print(token.key)
-        return Response({"token": token.key,'csrfToken': csrf_token,}, status=status.HTTP_200_OK)
+        return Response({"token": token.key}, status=status.HTTP_200_OK)
     
 
 

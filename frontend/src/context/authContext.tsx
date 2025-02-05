@@ -7,16 +7,12 @@ import { toast } from "react-toastify";
 
 const notify = () => toast("Registered Successfully!");
 const loginError = () => toast("Invalid Credentials");
-const loginSuccess = () => toast("Invalid Credentials");
-
-type User = {
-  username: string;
-};
+const loginSuccess = () => toast("Login Success");
 
 interface AuthContextType {
+  username: string;
+  password: string;
   token: string;
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   logOut: () => void;
   login: (loginCredentials: { username: string; password: string }) => void;
   registerUser: (newData: UserRegistration) => void;
@@ -26,7 +22,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string>(
+    localStorage.getItem("username") || ""
+  );
+  const [password, setPassword] = useState<string>(
+    localStorage.getItem("password") || ""
+  );
   const [token, setToken] = useState<string>(
     localStorage.getItem("token") || ""
   );
@@ -76,10 +77,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       return response.data;
     },
-    onSuccess: (res) => {
+    onSuccess: (res, credentials) => {
       setToken(res.token);
       loginSuccess();
       localStorage.setItem("token", res.token);
+      setUsername(credentials.username);
+      setPassword(credentials.password);
+      localStorage.setItem("username", credentials.username);
+      localStorage.setItem("password", credentials.password);
       navigate("/");
     },
     onError: () => {
@@ -88,7 +93,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const logOut = () => {
-    setUser(null);
     setToken("");
     localStorage.removeItem("token");
     navigate("/login");
@@ -96,7 +100,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ token, user, setUser, logOut, login, registerUser }}
+      value={{ token, username, password, logOut, login, registerUser }}
     >
       {children}
     </AuthContext.Provider>
