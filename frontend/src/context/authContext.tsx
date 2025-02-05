@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { UserRegistration } from "../components/auth/Register/Register";
 import { toast } from "react-toastify";
 
@@ -32,12 +32,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.getItem("token") || ""
   );
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (token) {
+    // If token exists and user is on login/register, redirect to home
+    if (
+      token &&
+      (location.pathname === "/login" || location.pathname === "/register")
+    ) {
       navigate("/");
     }
-  }, [token, navigate]);
+  }, [token, location.pathname, navigate]);
 
   const { mutate: registerUser } = useMutation({
     mutationKey: ["register"],

@@ -7,6 +7,8 @@ import AuthProvider from "./context/authContext";
 import Register from "./components/auth/Register/Register";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ToastContainer } from "react-toastify";
+import RecommendJob from "./components/RecommendJob/RecommendJob";
+import CalculateATS from "./components/CalculateATS/calculateATS";
 
 function App() {
   return (
@@ -22,6 +24,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calculate-ats"
+              element={
+                <ProtectedRoute>
+                  <CalculateATS />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recommend-job"
+              element={
+                <ProtectedRoute>
+                  <RecommendJob />
                 </ProtectedRoute>
               }
             />
