@@ -1,9 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { UserRegistration } from "../components/auth/Register/Register";
 import { toast } from "react-toastify";
+import { FileData } from "../components/FileDropZone/MyDropZone";
 
 const notify = () => toast("Registered Successfully!");
 const loginError = () => toast("Invalid Credentials");
@@ -16,6 +17,8 @@ interface AuthContextType {
   logOut: () => void;
   login: (loginCredentials: { username: string; password: string }) => void;
   registerUser: (newData: UserRegistration) => void;
+  files: FileData[];
+  setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,13 +34,20 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [token, setToken] = useState<string>(
     localStorage.getItem("token") || ""
   );
+  const [files, setFiles] = useState<FileData[]>([]);
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (token) {
+    // If token exists and user is on login/register, redirect to home
+    if (
+      token &&
+      (location.pathname === "/login" || location.pathname === "/register")
+    ) {
       navigate("/");
     }
-  }, [token, navigate]);
+  }, [token, location.pathname, navigate]);
 
   const { mutate: registerUser } = useMutation({
     mutationKey: ["register"],
@@ -100,7 +110,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ token, username, password, logOut, login, registerUser }}
+      value={{
+        token,
+        username,
+        password,
+        logOut,
+        login,
+        registerUser,
+        files,
+        setFiles,
+      }}
     >
       {children}
     </AuthContext.Provider>
