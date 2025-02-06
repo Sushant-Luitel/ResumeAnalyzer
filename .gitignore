@@ -52,4 +52,15 @@ Thumbs.db
 
 # OS-specific
 .DS_Store
-Thumbs.db
+
+backend/api/migrations/__pycache__
+
+media/documents
+
+
+backend/media/static/cleaned_df.pkl
+backend/static/cleaned_data.csv
+backend/db.sqlite3
+backend/api/tests.py
+
+backend/static/job_descriptions.csv
