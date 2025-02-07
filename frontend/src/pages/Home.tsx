@@ -1,13 +1,13 @@
 import { Box } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Heroimg from "../assets/HeroImg.jpg";
 import Footer from "../components/Footer/Footer";
 
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <Box>
       <div className="min-h-screen flex flex-col justify-between bg-gradient-to-tr from-teal-600 to-teal-900">
-        {/* Hero Section */}
         <div className="flex h-screen justify-center items-center">
           <div className="flex flex-col items-start ml-10 mt-6 -mr-50 z-10 lg:mt-20">
             <h1 className=" text-2xl sm:text-3xl lg:text-6xl font-bold tracking-wide text-start">
@@ -41,7 +41,10 @@ const Home = () => {
               Features
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
+              <div
+                className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out cursor-pointer"
+                onClick={() => navigate("/recommend-job")}
+              >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
                   AI-Powered Insights
                 </h3>
@@ -50,7 +53,10 @@ const Home = () => {
                   to improve your chances of landing a job.
                 </p>
               </div>
-              <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
+              <div
+                className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out cursor-pointer"
+                onClick={() => navigate("/calculate-ats")}
+              >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
                   ATS Optimization
                 </h3>

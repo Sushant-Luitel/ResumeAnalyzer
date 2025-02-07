@@ -16,12 +16,10 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 py-3 backdrop-blur-lg border-b border-neutral-700/80">
       <div className="container px-4 mx-auto text-sm relative">
         <div className="flex justify-between items-center">
-          <div className="flex items-center flex-shrink-0">
+          <Link to={"/"} className="flex items-center flex-shrink-0">
             <BrainCircuit className=" h-10 w-16" />
-            <Link to="/" className="text-2xl font-bold">
-              ARSS
-            </Link>
-          </div>
+            <span className="text-2xl font-bold">ARSS</span>
+          </Link>
           <ul className=" hidden lg:flex ml-96 space-x-12">
             <li>
               <a href="#">Features</a>
