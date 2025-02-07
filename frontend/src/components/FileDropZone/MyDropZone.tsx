@@ -54,13 +54,12 @@ const MyDropZone: React.FC = () => {
     setFiles([]);
   };
 
-  const { mutate: uploadFile, isPending } = useMutation({
+  const { mutate: uploadFile } = useMutation({
     mutationKey: ["uploadFile"],
     mutationFn: async (newFile: File) => {
       if (!newFile) {
         return;
       }
-      console.log(newFile, "newFile");
 
       const formData = new FormData();
       formData.append("file", newFile);
@@ -81,7 +80,6 @@ const MyDropZone: React.FC = () => {
       toast.success(res.message);
     },
   });
-  console.log(isPending);
   return (
     <div className="grid place-items-center gap-10">
       <div
@@ -89,45 +87,49 @@ const MyDropZone: React.FC = () => {
         className=" p-12 flex justify-center bg-white border border-dashed border-gray-300 rounded-xl  "
       >
         <input {...getInputProps()} />
-        <div className="text-center">
-          <span className="inline-flex justify-center items-center size-16 bg-gray-100 text-gray-800 rounded-full">
-            📁
-          </span>
-          <div className="mt-4 text-sm text-gray-600">
-            <span className="font-medium text-gray-800">
-              Drop your file here or{" "}
+        {files.length > 0 ? (
+          <>
+            <div className="mt-4 space-y-2">
+              <div className="p-3 bg-white border border-gray-300 rounded-xl flex items-center gap-x-3">
+                <img
+                  src={pdfLogo}
+                  alt="preview"
+                  className="size-10 rounded-lg"
+                />
+                <p className="text-sm font-medium text-gray-800">
+                  {files[0]?.file?.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {(files[0]?.file?.size / 1024).toFixed(2)} KB
+                </p>
+                <button
+                  onClick={removeFile}
+                  className="text-red-500 hover:text-red-700 focus:outline-none cursor-pointer"
+                >
+                  ❌
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center">
+            <span className="inline-flex justify-center items-center size-16 bg-gray-100 text-gray-800 rounded-full">
+              📁
             </span>
-            <span className="text-blue-600 font-semibold cursor-pointer">
-              browse
-            </span>
+            <div className="mt-4 text-sm text-gray-600">
+              <span className="font-medium text-gray-800">
+                Drop your file here or{" "}
+              </span>
+              <span className="text-blue-600 font-semibold cursor-pointer">
+                browse
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-gray-400">Pick a file up to 2MB.</p>
           </div>
-          <p className="mt-1 text-xs text-gray-400">Pick a file up to 2MB.</p>
-        </div>
+        )}
       </div>
 
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-      {files.length > 0 && (
-        <>
-          <div className="mt-4 space-y-2">
-            <div className="p-3 bg-white border border-gray-300 rounded-xl flex items-center gap-x-3">
-              <img src={pdfLogo} alt="preview" className="size-10 rounded-lg" />
-              <p className="text-sm font-medium text-gray-800">
-                {files[0]?.file?.name}
-              </p>
-              <p className="text-xs text-gray-500">
-                {(files[0]?.file?.size / 1024).toFixed(2)} KB
-              </p>
-              <button
-                onClick={removeFile}
-                className="text-red-500 hover:text-red-700 focus:outline-none cursor-pointer"
-              >
-                ❌
-              </button>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

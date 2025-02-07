@@ -98,29 +98,28 @@ def file_upload(request):
 
 @api_view(['GET', 'POST'])
 
-@api_view(['POST'])
 def file_upload(request):
-    print(request.headers.get('Authorization'))
-    if request.user.is_authenticated:
-        try:
-            print(request.user)
-            token=Token.objects.get(user=request.user).key
+  
+    print(request.user)
+    
+    try:
+        if 'file' not in request.FILES:
+            return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Pass the user context to the serializer
+        serializer = FileSerializer(data=request.data, context={'user': request.user})
+        
+        if serializer.is_valid():
+            serializer.save()
+            # Get the token for the user
+            token = Token.objects.get(user=request.user).key
             print(token)
-            if 'file' not in request.FILES:
-                return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
-            serializer = FileSerializer(data=request.data, context={'user': request.user})
-            if serializer.is_valid():
-                serializer.save()
-                token=Token.objects.get(user=request.user).key
-                print(Token.objects.get(user=request.user).key)
-                return JsonResponse({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
-        except ObjectDoesNotExist:
-            return Response({'error': 'Token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer.errors) 
+            return Response({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+    
+    except ObjectDoesNotExist:
+        return Response({'error': 'Token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
 def compute_tf(text):
     """Compute Term Frequency"""
