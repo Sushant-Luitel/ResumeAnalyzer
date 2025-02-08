@@ -13,11 +13,18 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 import pickle
 import pandas as pd
-
 import math
+from PyPDF2 import PdfReader
 from collections import Counter
-import pandas as pd
-import pickle
+from rest_framework.response import Response
+from django.http import JsonResponse
+import re
+import nltk
+from nltk.corpus import stopwords as StopWords
+from nltk.stem import PorterStemmer
+
+from nltk.corpus import stopwords
+
 # import pypdf
 from PyPDF2 import PdfReader
 from .extract_skills import extract_skills,extract_education,skills,education
@@ -57,7 +64,7 @@ def login(request):
         # If user is authenticated, create or get the token
         token, created = Token.objects.get_or_create(user=user)
         print(token.key)
-        return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response({"token": token.key,'csrfToken': csrf_token,'username':user.username,'password':user.password}, status=status.HTTP_200_OK)
     
 
 
@@ -97,11 +104,8 @@ def file_upload(request):
     return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET', 'POST'])
-
 def file_upload(request):
-  
     print(request.user)
-    
     try:
         if 'file' not in request.FILES:
             return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -117,178 +121,171 @@ def file_upload(request):
             return Response({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
     except ObjectDoesNotExist:
         return Response({'error': 'Token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+# Download stopwords if not available
+nltk.download("stopwords")
+
+stemmer = PorterStemmer()
+stop_words = set(stopwords.words("english"))
+
+def preprocess_text(text):
+    """Preprocess text by lowercasing, removing non-alphanumeric characters, stemming, and filtering stopwords."""
+    text = re.sub(r"[^a-z0-9\s]", "", text.lower())  # Clean and lowercase text
+    words = [word for word in text.split() if len(word) > 1 and word not in stop_words]  # Remove short words and stopwords
+    return [stemmer.stem(word) for word in words]  # Apply stemming
+
 def compute_tf(text):
-    """Compute Term Frequency"""
-    try:
-        words = text.lower().split()
-        tf_counter = Counter(words)
-        total_words = len(words)
-        if total_words == 0:
-            return {}
-        tf = {word: count / total_words for word, count in tf_counter.items()}
-        return tf
-    except Exception as e:
-        print(f"Error in compute_tf: {str(e)}")
-        return {}
+    """Compute Term Frequency (TF)"""
+    words = preprocess_text(text)
+    total_words = len(words)
+    tf_counter = Counter(words)
+    return {word: count / total_words for word, count in tf_counter.items()} if total_words > 0 else {}
 
 def compute_idf(documents):
-    """Compute Inverse Document Frequency"""
-    try:
-        total_docs = len(documents)
-        if total_docs == 0:
-            return {}
-        
-        idf = {}
-        # Process documents to avoid memory issues
-        word_doc_count = Counter()
-        
-        for doc in documents:
-            words = set(doc.lower().split())
-            word_doc_count.update(words)
-        
-        idf = {word: math.log(total_docs / (1 + count)) 
-               for word, count in word_doc_count.items()}
-        return idf
-    except Exception as e:
-        print(f"Error in compute_idf: {str(e)}")
-        return {}
+    """Compute Inverse Document Frequency (IDF)"""
+    total_docs = len(documents)
+    word_doc_count = Counter()
 
-def compute_tfidf(documents):
-    """Compute TF-IDF for documents"""
-    try:
-        if not documents:
-            return []
-            
-        idf = compute_idf(documents)
-        tfidf_documents = []
-        
-        for doc in documents:
-            tf = compute_tf(doc)
-            tfidf = {word: tf[word] * idf.get(word, 0) for word in tf}
-            tfidf_documents.append(tfidf)
-            
-        return tfidf_documents
-    except Exception as e:
-        print(f"Error in compute_tfidf: {str(e)}")
-        return []
+    for doc in documents:
+        word_doc_count.update(set(preprocess_text(doc)))  # Ensure unique words per document
 
-def cosine_similarity(doc_vector1, doc_vector2):
-    """Compute cosine similarity between two document vectors"""
-    try:
-        if not doc_vector1 or not doc_vector2:
-            return 0.0
-            
-        intersection = set(doc_vector1.keys()) & set(doc_vector2.keys())
-        numerator = sum([doc_vector1[x] * doc_vector2[x] for x in intersection])
+    return {word: math.log((total_docs + 1) / (1 + count)) for word, count in word_doc_count.items()}
 
-        sum1 = sum([doc_vector1[x] ** 2 for x in doc_vector1])
-        sum2 = sum([doc_vector2[x] ** 2 for x in doc_vector2])
-        denominator = math.sqrt(sum1) * math.sqrt(sum2)
-
-        if not denominator:
-            return 0.0
-        return float(numerator) / denominator
-    except Exception as e:
-        print(f"Error in cosine_similarity: {str(e)}")
-        return 0.0
+def cosine_similarity(vec1, vec2):
+    """Compute cosine similarity between two TF-IDF vectors"""
+    intersection = set(vec1.keys()) & set(vec2.keys())
+    numerator = sum(vec1[x] * vec2[x] for x in intersection)
+    sum1 = sum(value ** 2 for value in vec1.values())
+    sum2 = sum(value ** 2 for value in vec2.values())
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+    return float(numerator) / denominator if denominator else 0.0
 
 def process_pdf(file_path, max_pages=3):
-    """Process PDF with page limit"""
+    """Extract text from a PDF file."""
     try:
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             reader = PdfReader(f)
-            text = ""
-            # Process only first few pages
-            for page in reader.pages[:max_pages]:
-                text += page.extract_text()
-            # Limit text length to avoid memory issues
+            text = "".join(page.extract_text() or "" for page in reader.pages[:max_pages])
             return text[:50000]  # Limit to 50K characters
     except Exception as e:
         print(f"Error processing PDF: {str(e)}")
-        raise
+        return ""
 
-@api_view(['GET', 'POST'])
+@api_view(["GET", "POST"])
 def recommend_jobs(request, username):
-    """Main job recommendation function"""
+    """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
     try:
-        # Input validation
         if not username:
             return Response({"error": "Username is required"}, status=400)
 
-        # Retrieve user
-        try:
-            user = CustomUser.objects.get(username=username)
-        except CustomUser.DoesNotExist:
+        # Retrieve user and uploaded resume
+        user = CustomUser.objects.filter(username=username).first()
+        if not user:
             return Response({"error": "User not found"}, status=404)
 
-        # Get latest file upload
         file = FileUpload.objects.filter(user=user).last()
         if not file:
             return Response({"error": "No resume found"}, status=404)
 
-        # Process PDF
-        try:
-            text = process_pdf(file.file.path)
-            user_skill = extract_skills(text, skills)
-            user_education = extract_education(text, education)
-            if not user_education:
-                user_education = ""
-        except Exception as e:
-            print(f"Error processing resume: {str(e)}")
+        # Extract resume content
+        text = process_pdf(file.file.path)
+        if not text:
             return Response({"error": "Error processing resume"}, status=500)
 
-        # Load job data
-        try:
-            print("Loading job data...")
-            df = pd.read_csv('C:/Users/Asus/Desktop/dev/ResumeAnalyzer/backend/static/job_descriptions.csv')
-            print(df.sample(2))
-            with open('C:/Users/Asus/Desktop/dev/ResumeAnalyzer/backend/static/cleanded_df.pkl', 'rb') as fp:
-                print("Loading cleaned job data...")
-                cleaned_df = pickle.load(fp)
-        except Exception as e:
-            print(f"Error loading job data: {str(e)}")
-            return Response({"error": "Error loading job data"}, status=500)
-
-        # Combine user qualifications
+        # Extract skills and education from resume
+        user_skill = extract_skills(text, skills)
+        user_education = extract_education(text, education)
         user_qualification = f"{user_skill} {user_education}".strip()
+
         if not user_qualification:
             return Response({"error": "No qualifications extracted from resume"}, status=400)
 
-        # Compute TF-IDF
-        job_descriptions = cleaned_df['skills'] + " " + cleaned_df['qualifications']
-        tfidf_jobs = compute_tfidf(job_descriptions.tolist())
-        user_tfidf = compute_tfidf([user_qualification])[0]
+        # Load job data (only once)
+        try:
+            df = pd.read_csv("/home/karun/riki/dev/ResumeAnalyzer/backend/static/job_descriptions.csv")
+            df=df.sample(100)
+            if df.empty:
+                return Response({"error": "Job descriptions dataset is empty"}, status=500)
 
-        # Calculate similarities
-        similarities = []
-        for job_tfidf in tfidf_jobs:
-            try:
-                similarity = cosine_similarity(user_tfidf, job_tfidf)
-                similarities.append(similarity)
-            except Exception as e:
-                print(f"Error calculating similarity: {str(e)}")
-                similarities.append(0.0)
+            # Load cleaned job descriptions from pickle file
+            # with open(, "rb") as fp:
+            #     cleaned_df = pickle.load(fp)
+            cleaned_df = pd.read_csv("/home/karun/riki/dev/ResumeAnalyzer/backend/static/cleaned_data.csv")   
+            cleaned_df=cleaned_df.sample(100)
+            # Ensure the cleaned data is not empty
+            if cleaned_df.empty:
+                return Response({"error": "Cleaned job descriptions dataset is empty"}, status=500)
 
-        # Create recommendations
-        df['Similarity'] = similarities
-        rec = df.sort_values(by='Similarity', ascending=False)
-        unique_rec = rec.drop_duplicates(subset=['Job Title'])
-        top_jobs = unique_rec[['Job Title', 'Role', 'Similarity', 'Job Description', 'Work Type']].iloc[1:6]
-        
-        recommendations = top_jobs.to_dict(orient='records')
-        
-        return JsonResponse({
-            'recommendations': recommendations,
-            'status': 'success'
-        })
+            # Combine skills and qualifications into a single list
+            job_descriptions = (cleaned_df["skills"] + " " + cleaned_df["qualifications"]).tolist()
+
+        except Exception as e:
+            return Response({"error": f"Error loading job data: {str(e)}"}, status=500)
+
+        # Compute TF-IDF for job descriptions and user qualifications
+        idf_jobs = compute_idf(job_descriptions)
+        tfidf_jobs = [compute_tf(doc) for doc in job_descriptions]
+        user_tf = compute_tf(user_qualification)
+
+        # Compute TF-IDF for user and calculate cosine similarity
+        user_tfidf = {word: user_tf[word] * idf_jobs.get(word, 0) for word in user_tf}
+        similarities = [cosine_similarity(user_tfidf, {word: tf[word] * idf_jobs.get(word, 0) for word in tf}) for tf in tfidf_jobs]
+
+        # Add similarity scores to the job dataframe and get top 5 jobs
+        df["Similarity"] = similarities
+        top_jobs = df.sort_values(by="Similarity", ascending=False).drop_duplicates(subset=["Job Title"]).iloc[:5]
+
+        return JsonResponse({"recommendations": top_jobs.to_dict(orient="records"), "status": "success"})
 
     except Exception as e:
-        print(f"Unexpected error in recommend_jobs: {str(e)}")
-        return Response({
-            "error": "An unexpected error occurred",
-            "details": str(e)
-        }, status=500)
+        print(f"Unexpected error: {str(e)}")
+        return Response({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+
+
+@api_view(["POST"])
+def ats_score_computation(request):
+    """Compute ATS score based on job description and resume similarity."""
+    if request.method == "POST":
+        try:
+            user = CustomUser.objects.get(username=request.user.username)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+
+        file = FileUpload.objects.filter(user=user).last()
+        if not file:
+            return Response({"error": "No resume found"}, status=404)
+
+        text = process_pdf(file.file.path)
+        if not text:
+            return Response({"error": "Error processing resume"}, status=500)
+
+        user_skill = extract_skills(text,skills)
+        if not user_skill:
+            return Response({"error": "No skills extracted from resume"}, status=400)
+
+        job_description = request.data.get("job_description", " ")
+        if not job_description:
+            return Response({"error": "No job description provided"}, status=400)
+
+        # Clean job description
+        cleaned_job_description = preprocess_text(job_description)
+
+        # Compute TF-IDF
+        job_tf = compute_tf(cleaned_job_description)
+        user_tf = compute_tf(user_skill)
+        vocabulary = set(job_tf.keys()).union(set(user_tf.keys()))
+        idf_jobs = compute_idf([job_description, user_skill])
+
+        job_tfidf = {word: job_tf[word] * idf_jobs.get(word, 0) for word in job_tf}
+        user_tfidf = {word: user_tf[word] * idf_jobs.get(word, 0) for word in user_tf}
+
+        similarity = cosine_similarity(user_tfidf, job_tfidf)
+
+        return Response({"similarity_score": similarity, "status": "success"}, status=200)
+
+    return Response({"error": "Invalid request method"}, status=400)
+
