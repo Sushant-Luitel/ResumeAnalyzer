@@ -67,7 +67,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       notify();
       navigate("/login");
     },
-    onError: () => {},
+    onError: (res: unknown) => {
+      toast.error(res?.response?.data?.username[0]);
+    },
   });
 
   const { mutate: login } = useMutation({

@@ -5,6 +5,7 @@ import Footer from "../components/Footer/Footer";
 
 const Home = () => {
   const navigate = useNavigate();
+
   return (
     <Box>
       <div className="min-h-screen flex flex-col justify-between bg-gradient-to-tr from-teal-600 to-teal-900">
