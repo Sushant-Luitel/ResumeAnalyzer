@@ -18,25 +18,23 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <Link to={"/"} className="flex items-center flex-shrink-0">
             <BrainCircuit className=" h-10 w-16" />
-            <span className="text-2xl font-bold">ARSS</span>
+            <span className="text-2xl font-bold text-teal-950">ARSS</span>
           </Link>
-          <ul className=" hidden lg:flex ml-96 space-x-12">
+          <ul className=" hidden lg:flex ml-96 space-x-12 text-teal-950">
             <li>
-              <a href="#">Features</a>
+              <a href="#features">Features</a>
             </li>
             <li>
-              <a href="#">How it works</a>
+              <a href="#how-it-works">How it works</a>
             </li>
-            <li>
-              <a href="#">Contact</a>
-            </li>
+
             <li>
               <a href="https://www.overleaf.com/">Build Resume</a>
             </li>
           </ul>
           <div className=" hidden lg:flex justify-center items-center">
             <button
-              className="border border-black bg-gradient-to-r from-teal-800 to-teal-600 px-4 py-2 rounded text-white"
+              className="border border-black bg-gradient-to-r from-teal-800 to-teal-600 px-4 py-2 rounded text-white cursor-pointer"
               onClick={() => logOut()}
             >
               Log Out

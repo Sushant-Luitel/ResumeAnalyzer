@@ -10,26 +10,26 @@ const Home = () => {
       <div className="min-h-screen flex flex-col justify-between bg-gradient-to-tr from-teal-600 to-teal-900">
         <div className="flex h-screen justify-center items-center">
           <div className="flex flex-col items-start ml-10 mt-6 -mr-50 z-10 lg:mt-20">
-            <h1 className=" text-2xl sm:text-3xl lg:text-6xl font-bold tracking-wide text-start">
-              <p className=" text-black">
-                Optimize your resume to get more interviews
+            <h1 className="text-2xl sm:text-3xl lg:text-6xl font-bold tracking-wide text-start">
+              <p className="text-gray-100">
+                Automated Resume Screening & Optimization
               </p>
             </h1>
-            <p className=" mt-10 text-lg text-start text-neutral-900 w-52">
-              Our system helps you optimize your resume for any job,highlighting
-              the key skills required.
+            <p className="mt-10 text-lg text-start text-orange-200 w-52">
+              Our AI-driven system analyzes resumes, provides feedback, and
+              optimizes them to improve job application success rates.
             </p>
             <div className="flex self-start my-10">
               <Link
-                className="text-2xl rounded-lg text-gray-900 font-semibold hover:underline hover:text-gray-400 transition duration-300"
-                to="/resumeupload"
+                className="text-2xl rounded-lg text-gray-100 font-semibold hover:underline hover:text-gray-400 transition duration-300"
+                to="/recommend-job"
               >
                 Get Started &gt;&gt;
               </Link>
             </div>
           </div>
           <img
-            className=" border rounded-l-3xl w-2/3 ml-2 my-10"
+            className="border rounded-l-3xl w-2/3 ml-2 my-10"
             src={Heroimg}
             alt="heroimage"
           />
@@ -43,14 +43,14 @@ const Home = () => {
             <div className="grid md:grid-cols-3 gap-8">
               <div
                 className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out cursor-pointer"
-                onClick={() => navigate("/recommend-job")}
+                onClick={() => navigate("/resume-analysis")}
               >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  AI-Powered Insights
+                  AI-Powered Resume Analysis
                 </h3>
                 <p className="text-gray-600">
-                  Our AI analyzes your resume and provides actionable insights
-                  to improve your chances of landing a job.
+                  Our AI evaluates resumes based on key metrics like skills,
+                  experience, and formatting to enhance their effectiveness.
                 </p>
               </div>
               <div
@@ -58,19 +58,20 @@ const Home = () => {
                 onClick={() => navigate("/calculate-ats")}
               >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  ATS Optimization
+                  ATS Compatibility Check
                 </h3>
                 <p className="text-gray-600">
-                  Ensure your resume passes through Applicant Tracking Systems
-                  (ATS) with ease.
+                  Ensures your resume meets industry-standard ATS requirements,
+                  increasing chances of selection.
                 </p>
               </div>
               <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  Real-Time Scanning
+                  Job Match Recommendations
                 </h3>
                 <p className="text-gray-600">
-                  Get real-time feedback as you upload and modify your resume.
+                  Get personalized job recommendations based on your resume
+                  content and qualifications.
                 </p>
               </div>
             </div>
@@ -80,7 +81,7 @@ const Home = () => {
         <section id="how-it-works" className="py-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-semibold text-white mb-8">
-              How it works
+              How it Works
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
@@ -88,26 +89,26 @@ const Home = () => {
                   1. Upload Resume
                 </h3>
                 <p className="text-gray-600">
-                  Drag and drop your resume or upload a file to start the
-                  scanning process.
+                  Simply upload your resume, and our system will start analyzing
+                  its content.
                 </p>
               </div>
               <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  2. Instant Feedback
+                  2. AI Analysis & Scoring
                 </h3>
                 <p className="text-gray-600">
-                  Receive detailed feedback on key areas to improve, from
-                  formatting to keywords.
+                  Our AI evaluates your resume and provides detailed feedback on
+                  how to improve it.
                 </p>
               </div>
               <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  3. Download and Apply
+                  3. Download & Apply
                 </h3>
                 <p className="text-gray-600">
-                  Download your optimized resume and start applying to jobs with
-                  confidence.
+                  Download your optimized resume and apply for jobs with higher
+                  chances of success.
                 </p>
               </div>
             </div>
