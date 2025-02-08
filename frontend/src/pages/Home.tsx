@@ -66,7 +66,10 @@ const Home = () => {
                   increasing chances of selection.
                 </p>
               </div>
-              <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
+              <Link
+                to={"/recommend-job"}
+                className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out"
+              >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
                   Job Match Recommendations
                 </h3>
@@ -74,7 +77,7 @@ const Home = () => {
                   Get personalized job recommendations based on your resume
                   content and qualifications.
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </section>

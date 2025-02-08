@@ -1,4 +1,4 @@
-import { Box } from "@mantine/core";
+import { Box, Button } from "@mantine/core";
 import styles from "./register.module.css";
 import { Link } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -25,7 +25,7 @@ const Register = () => {
     mode: "onBlur",
   });
 
-  const { registerUser } = useAuth();
+  const { registerUser, isRegisterPending } = useAuth();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
