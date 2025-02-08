@@ -206,16 +206,16 @@ def recommend_jobs(request, username):
 
         # Load job data (only once)
         try:
-            df = pd.read_csv("/home/karun/riki/dev/ResumeAnalyzer/backend/static/job_descriptions.csv")
-            df=df.sample(100)
+            df = pd.read_csv("D:/ResumeAnalyzer/backend/static/job_descriptions.csv")
+            df=df.sample(1000)
             if df.empty:
                 return Response({"error": "Job descriptions dataset is empty"}, status=500)
 
             # Load cleaned job descriptions from pickle file
             # with open(, "rb") as fp:
             #     cleaned_df = pickle.load(fp)
-            cleaned_df = pd.read_csv("/home/karun/riki/dev/ResumeAnalyzer/backend/static/cleaned_data.csv")   
-            cleaned_df=cleaned_df.sample(100)
+            cleaned_df = pd.read_csv("D:/ResumeAnalyzer/backend/static/cleaned_data.csv")   
+            cleaned_df=cleaned_df.sample(1000)
             # Ensure the cleaned data is not empty
             if cleaned_df.empty:
                 return Response({"error": "Cleaned job descriptions dataset is empty"}, status=500)
