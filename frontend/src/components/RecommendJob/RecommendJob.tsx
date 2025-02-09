@@ -86,50 +86,47 @@ const RecommendJob = () => {
       >
         Recommend Job
       </Button>
-      {recommendationsData?.length > 1 &&
-        recommendationsData?.every(
-          (data: JobDetails) => data.Similarity > 0.5
-        ) && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-4 py-2 text-left border-b">Job Title</th>
-                  <th className="px-4 py-2 text-left border-b">Work Type</th>
-                  <th className="px-4 py-2 text-left border-b">Salary Range</th>
-                  <th className="px-4 py-2 text-left border-b">Experience</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recommendationsData?.map((data: JobDetails, index: number) => {
-                  if (data.Similarity > 0.4)
-                    return (
-                      <tr
-                        key={index}
-                        className="hover:bg-gray-100 transition duration-300 ease-in-out"
-                      >
-                        <td className="px-4 py-2 border-b">
-                          {data["Job Title"]}
-                        </td>
-                        <td className="px-4 py-2 border-b">
-                          {data["Work Type"]}
-                        </td>
-                        <td className="px-4 py-2 border-b">
-                          {data["Salary Range"]}
-                        </td>
-                        <td className="px-4 py-2 border-b">
-                          {data["Experience"]}
-                        </td>
-                      </tr>
-                    );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {recommendationsData?.length > 1 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="px-4 py-2 text-left border-b">Job Title</th>
+                <th className="px-4 py-2 text-left border-b">Work Type</th>
+                <th className="px-4 py-2 text-left border-b">Salary Range</th>
+                <th className="px-4 py-2 text-left border-b">Experience</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recommendationsData?.map((data: JobDetails, index: number) => {
+                if (data.Similarity > 0.4)
+                  return (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-100 transition duration-300 ease-in-out"
+                    >
+                      <td className="px-4 py-2 border-b">
+                        {data["Job Title"]}
+                      </td>
+                      <td className="px-4 py-2 border-b">
+                        {data["Work Type"]}
+                      </td>
+                      <td className="px-4 py-2 border-b">
+                        {data["Salary Range"]}
+                      </td>
+                      <td className="px-4 py-2 border-b">
+                        {data["Experience"]}
+                      </td>
+                    </tr>
+                  );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
       {recommendationsData.length > 1 &&
         recommendationsData?.every(
-          (data: JobDetails) => data.Similarity < 0.5
+          (data: JobDetails) => data.Similarity < 0.4
         ) && (
           <h1 className="text-red-800 text-xl sm:text-2xl font-semibold p-4 rounded-lg shadow-md text-center bg-teal-300">
             No Suitable Jobs Found. Please Consider Improving Your Resume.
