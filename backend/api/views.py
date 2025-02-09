@@ -287,8 +287,8 @@ def ats_score_computation(request):
             return Response({"error": "No job description provided"}, status=400)
 
          # Extract skills and education from job desc
-        jobs_skill = extract_skills(text, skills)
-        jobs_education = extract_education(text, education)
+        jobs_skill = extract_skills(job_description, skills)
+        jobs_education = extract_education(job_description, education)
         jobs_qualification = f"{jobs_skill} {jobs_education}".strip()
         print("line 293", jobs_qualification)
 
