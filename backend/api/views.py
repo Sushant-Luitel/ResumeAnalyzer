@@ -134,6 +134,8 @@ stop_words = set(stopwords.words("english"))
 
 def preprocess_text(text):
     """Preprocess text by lowercasing, removing non-alphanumeric characters, stemming, and filtering stopwords."""
+    if isinstance(text, list):  
+        text = " ".join(text)  # Convert list to string
     text = re.sub(r"[^a-z0-9\s]", "", text.lower())  # Clean and lowercase text
     words = [word for word in text.split() if len(word) > 1 and word not in stop_words]  # Remove short words and stopwords
     return [stemmer.stem(word) for word in words]  # Apply stemming
@@ -154,6 +156,19 @@ def compute_idf(documents):
         word_doc_count.update(set(preprocess_text(doc)))  # Ensure unique words per document
 
     return {word: math.log((total_docs + 1) / (1 + count)) for word, count in word_doc_count.items()}
+
+
+def compute_idf_ats(documents):
+    """Compute Inverse Document Frequency (IDF)"""
+    total_docs = len(documents)
+    word_doc_count = Counter()
+
+    for doc in documents:
+        tokens = set(preprocess_text(doc))
+        for token in tokens:
+            word_doc_count[token] = word_doc_count.get(token, 0) + 1
+
+    return {word: math.log((total_docs + 1) / (1 + count)) + 1 for word, count in word_doc_count.items()}
 
 def cosine_similarity(vec1, vec2):
     """Compute cosine similarity between two TF-IDF vectors"""
@@ -206,16 +221,16 @@ def recommend_jobs(request, username):
 
         # Load job data (only once)
         try:
-            df = pd.read_csv("D:/ResumeAnalyzer/backend/static/job_descriptions.csv")
-            df=df.sample(1000)
+            df = pd.read_csv("static/job_descriptions.csv")
+            df=df.sample(100)
             if df.empty:
                 return Response({"error": "Job descriptions dataset is empty"}, status=500)
 
             # Load cleaned job descriptions from pickle file
             # with open(, "rb") as fp:
             #     cleaned_df = pickle.load(fp)
-            cleaned_df = pd.read_csv("D:/ResumeAnalyzer/backend/static/cleaned_data.csv")   
-            cleaned_df=cleaned_df.sample(1000)
+            cleaned_df = pd.read_csv("static/cleaned_data.csv")   
+            cleaned_df=cleaned_df.sample(100)
             # Ensure the cleaned data is not empty
             if cleaned_df.empty:
                 return Response({"error": "Cleaned job descriptions dataset is empty"}, status=500)
@@ -271,17 +286,29 @@ def ats_score_computation(request):
         if not job_description:
             return Response({"error": "No job description provided"}, status=400)
 
+         # Extract skills and education from job desc
+        jobs_skill = extract_skills(text, skills)
+        jobs_education = extract_education(text, education)
+        jobs_qualification = f"{jobs_skill} {jobs_education}".strip()
+        print("line 293", jobs_qualification)
+
         # Clean job description
-        cleaned_job_description = preprocess_text(job_description)
+        cleaned_job_description = preprocess_text(jobs_qualification)
 
         # Compute TF-IDF
         job_tf = compute_tf(cleaned_job_description)
+        print("line281", job_tf)
         user_tf = compute_tf(user_skill)
+        print("line283", user_tf)
         vocabulary = set(job_tf.keys()).union(set(user_tf.keys()))
-        idf_jobs = compute_idf([job_description, user_skill])
+        print("line 285", vocabulary)
+        idf_jobs = compute_idf_ats([jobs_qualification, user_skill])
+        print("line 287", idf_jobs)
 
         job_tfidf = {word: job_tf[word] * idf_jobs.get(word, 0) for word in job_tf}
+        print("line 290", job_tfidf)
         user_tfidf = {word: user_tf[word] * idf_jobs.get(word, 0) for word in user_tf}
+        print("line 292", user_tfidf)
 
         similarity = cosine_similarity(user_tfidf, job_tfidf)
 
