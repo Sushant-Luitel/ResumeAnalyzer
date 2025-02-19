@@ -5,7 +5,7 @@ skills = [
     'Python', 'Django', 'Machine Learning', 'JavaScript', 'React', 'SQL', 'Java', 'Node.js', 'HTML', 'CSS', 
     'Flask', 'Keras', 'TensorFlow', 'Ruby', 'C++', 'PHP', 'PostgreSQL', 'AWS', 'Azure', 'Git', 'Docker', 'Angular',
     'MySql','PostgressSql', 'frontend framework','backend framework','Django rest framework',
-    'DjangoRestFramework','ReactJs','ReactNative','React Native'
+    'DjangoRestFramework','ReactJs','ReactNative','React Native', "git"
 ]
 
 education = [

@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Loader from "../reusable/Loader";
+import { Link } from "react-router-dom";
 
 type JobDetails = {
   "Job Id": number;
@@ -37,6 +38,8 @@ type JobDetails = {
 const RecommendJob = () => {
   const { files, username, password } = useAuth();
   const [recommendationsData, setRecommendationsData] = useState([]);
+  const [selectedJob, setSelectedJob] = useState<JobDetails | null>(null);
+
   const { mutate: recommendJob, isPending } = useMutation({
     mutationKey: ["recommendJob"],
     mutationFn: async (newData: { username: string }) => {
@@ -86,52 +89,57 @@ const RecommendJob = () => {
       >
         Recommend Job
       </Button>
-      {recommendationsData?.length > 1 && (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="px-4 py-2 text-left border-b">Job Title</th>
-                <th className="px-4 py-2 text-left border-b">Work Type</th>
-                <th className="px-4 py-2 text-left border-b">Salary Range</th>
-                <th className="px-4 py-2 text-left border-b">Experience</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recommendationsData?.map((data: JobDetails, index: number) => {
-                if (data.Similarity > 0.4)
-                  return (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-100 transition duration-300 ease-in-out"
-                    >
-                      <td className="px-4 py-2 border-b">
-                        {data["Job Title"]}
-                      </td>
-                      <td className="px-4 py-2 border-b">
-                        {data["Work Type"]}
-                      </td>
-                      <td className="px-4 py-2 border-b">
-                        {data["Salary Range"]}
-                      </td>
-                      <td className="px-4 py-2 border-b">
-                        {data["Experience"]}
-                      </td>
-                    </tr>
-                  );
-              })}
-            </tbody>
-          </table>
+
+      <div className="p-6 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">Job Listings</h1>
+        <div className="grid gap-4 grid-cols-3">
+          {recommendationsData?.map((job: JobDetails) => (
+            <button
+              key={job["Job Id"]}
+              onClick={() => setSelectedJob(job)}
+              className="block p-4 border rounded-lg shadow hover:bg-gray-100 transition w-full text-left"
+            >
+              <h2 className="text-lg font-semibold">{job["Job Title"]}</h2>
+              <p className="text-gray-700">{job["Company"]}</p>
+              <p className="text-gray-600">{job["location"]}</p>
+              <p className="text-gray-800 font-semibold">
+                {job["Salary Range"]}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {selectedJob && (
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xl z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative">
+            <button
+              onClick={() => setSelectedJob(null)}
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+            >
+              ✖
+            </button>
+            <h2 className="text-2xl font-bold mb-2">
+              {selectedJob["Job Title"]}
+            </h2>
+            <p className="text-gray-700 font-semibold">
+              {selectedJob["Company"]}
+            </p>
+            <p className="text-gray-600">{selectedJob["location"]}</p>
+            <p className="text-gray-800 font-semibold">
+              {selectedJob["Salary Range"]}
+            </p>
+            <p className="text-gray-700 mt-2">
+              {selectedJob["Job Description"]}
+            </p>
+
+            {/* Apply Button */}
+            <Button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md w-full">
+              Apply Now
+            </Button>
+          </div>
         </div>
       )}
-      {recommendationsData.length > 1 &&
-        recommendationsData?.every(
-          (data: JobDetails) => data.Similarity < 0.4
-        ) && (
-          <h1 className="text-red-800 text-xl sm:text-2xl font-semibold p-4 rounded-lg shadow-md text-center bg-teal-300">
-            No Suitable Jobs Found. Please Consider Improving Your Resume.
-          </h1>
-        )}
     </div>
   );
 };
