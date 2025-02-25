@@ -8,44 +8,16 @@ import { useEffect, useState } from "react";
 import Loader from "../reusable/Loader";
 import { Link } from "react-router-dom";
 
-type JobDetails = {
-  "Job Id": number;
-  Experience: string;
-  Qualifications: string;
-  "Salary Range": string;
-  location: string;
-  Country: string;
-  latitude: number;
-  longitude: number;
-  "Work Type": string;
-  "Company Size": number;
-  "Job Posting Date": string;
-  preference: string;
-  "Contact Person": string;
-  Contact: string;
-  "Job Title": string;
-  Role: string;
-  "Job Portal": string;
-  "Job Description": string;
-  Benefits: string;
-  Skills: string;
-  Responsibilities: string;
-  Company: string;
-  "Company Profile": string;
-  Similarity: number;
-};
-
 const RecommendJob = () => {
   const { files, username, password } = useAuth();
   const [recommendationsData, setRecommendationsData] = useState([]);
-  const [selectedJob, setSelectedJob] = useState<JobDetails | null>(null);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   const { mutate: recommendJob, isPending } = useMutation({
-    mutationKey: ["recommendJob"],
-    mutationFn: async (newData: { username: string }) => {
+    mutationFn: async () => {
       const response = await axios.post(
         `http://127.0.0.1:8000/recommend/${username}/`,
-        newData,
+        {},
         {
           headers: {
             "Content-Type": "application/json",
@@ -55,63 +27,64 @@ const RecommendJob = () => {
       );
       return response.data;
     },
-    onSuccess: (res: Response) => {
-      console.log(res);
-      setRecommendationsData(res.recommendations);
-    },
-    onError: (err: Error) => {
-      console.log(err);
-    },
+    onSuccess: (res) => setRecommendationsData(res.recommendations),
+    onError: () => toast.error("Failed to fetch job recommendations."),
   });
 
-  const handleRecommendation = () => {
-    if (files.length > 0) {
-      recommendJob({ username });
-    } else {
-      toast.error("Please Upload Your Resume ");
-    }
-  };
-
   useEffect(() => {
-    if (files.length < 1) {
-      setRecommendationsData([]);
-    }
+    if (files.length < 1) setRecommendationsData([]);
   }, [files]);
+
+  const handleApply = () => {
+    toast.success("Applied Successfully");
+    setSelectedJob(null);
+  };
 
   if (isPending) return <Loader />;
 
   return (
-    <div className="grid place-items-center gap-10">
+    <div className="flex flex-col items-center gap-8 p-6 bg-teal-50 min-h-screen">
       <ResumeUpload />
       <Button
-        className="bg-amber-600 rounded-xl text-white px-2 py-2 cursor-pointer "
-        onClick={handleRecommendation}
+        className="bg-teal-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-teal-700 transition"
+        onClick={() =>
+          files.length > 0
+            ? recommendJob()
+            : toast.error("Please Upload Your Resume")
+        }
       >
         Recommend Job
       </Button>
 
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Job Listings</h1>
-        <div className="grid gap-4 grid-cols-3">
-          {recommendationsData?.map((job: JobDetails) => (
-            <button
-              key={job["Job Id"]}
-              onClick={() => setSelectedJob(job)}
-              className="block p-4 border rounded-lg shadow hover:bg-gray-100 transition w-full text-left"
-            >
-              <h2 className="text-lg font-semibold">{job["Job Title"]}</h2>
-              <p className="text-gray-700">{job["Company"]}</p>
-              <p className="text-gray-600">{job["location"]}</p>
-              <p className="text-gray-800 font-semibold">
-                {job["Salary Range"]}
-              </p>
-            </button>
-          ))}
+      <div className="p-6 w-full max-w-5xl">
+        <h1 className="text-3xl font-bold text-teal-800 mb-4">
+          Recommended Jobs
+        </h1>
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {recommendationsData.map((job) => {
+            if (job["Similarity"] > 0.4)
+              return (
+                <button
+                  key={job["Job Id"]}
+                  onClick={() => setSelectedJob(job)}
+                  className="p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition border border-teal-300 cursor-pointer"
+                >
+                  <h2 className="text-xl font-semibold text-teal-700">
+                    {job["Job Title"]}
+                  </h2>
+                  <p className="text-gray-700">{job["Company"]}</p>
+                  <p className="text-gray-600">{job["location"]}</p>
+                  <p className="text-teal-800 font-semibold">
+                    {job["Salary Range"]}
+                  </p>
+                </button>
+              );
+          })}
         </div>
       </div>
 
       {selectedJob && (
-        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xl z-50">
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-black/20 z-50 ">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative">
             <button
               onClick={() => setSelectedJob(null)}
@@ -119,22 +92,24 @@ const RecommendJob = () => {
             >
               ✖
             </button>
-            <h2 className="text-2xl font-bold mb-2">
+            <h2 className="text-2xl font-bold text-teal-800 mb-2">
               {selectedJob["Job Title"]}
             </h2>
             <p className="text-gray-700 font-semibold">
               {selectedJob["Company"]}
             </p>
             <p className="text-gray-600">{selectedJob["location"]}</p>
-            <p className="text-gray-800 font-semibold">
+            <p className="text-teal-800 font-semibold">
               {selectedJob["Salary Range"]}
             </p>
             <p className="text-gray-700 mt-2">
               {selectedJob["Job Description"]}
             </p>
 
-            {/* Apply Button */}
-            <Button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md w-full">
+            <Button
+              className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md w-full hover:bg-teal-700 transition cursor-pointer"
+              onClick={handleApply}
+            >
               Apply Now
             </Button>
           </div>
