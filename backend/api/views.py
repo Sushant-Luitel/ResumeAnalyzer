@@ -215,6 +215,7 @@ def recommend_jobs(request, username):
         user_skill = extract_skills(text, skills)
         user_education = extract_education(text, education)
         user_qualification = f"{user_skill} {user_education}".strip()
+        print(user_qualification+ "qualifications")
 
         if not user_qualification:
             return Response({"error": "No qualifications extracted from resume"}, status=400)
@@ -222,7 +223,7 @@ def recommend_jobs(request, username):
         # Load job data (only once)
         try:
             df = pd.read_csv("static/job_descriptions.csv")
-            df=df.sample(100)
+            df=df.sample(10000)
             if df.empty:
                 return Response({"error": "Job descriptions dataset is empty"}, status=500)
 
@@ -230,13 +231,15 @@ def recommend_jobs(request, username):
             # with open(, "rb") as fp:
             #     cleaned_df = pickle.load(fp)
             cleaned_df = pd.read_csv("static/cleaned_data.csv")   
-            cleaned_df=cleaned_df.sample(100)
+            cleaned_df=cleaned_df.sample(10000)
             # Ensure the cleaned data is not empty
             if cleaned_df.empty:
                 return Response({"error": "Cleaned job descriptions dataset is empty"}, status=500)
 
             # Combine skills and qualifications into a single list
             job_descriptions = (cleaned_df["skills"] + " " + cleaned_df["qualifications"]).tolist()
+            print(job_descriptions[0])
+            
 
         except Exception as e:
             return Response({"error": f"Error loading job data: {str(e)}"}, status=500)
@@ -253,6 +256,8 @@ def recommend_jobs(request, username):
         # Add similarity scores to the job dataframe and get top 5 jobs
         df["Similarity"] = similarities
         top_jobs = df.sort_values(by="Similarity", ascending=False).drop_duplicates(subset=["Job Title"]).iloc[:5]
+       
+       
 
         return JsonResponse({"recommendations": top_jobs.to_dict(orient="records"), "status": "success"})
 
