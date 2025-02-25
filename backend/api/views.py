@@ -303,6 +303,7 @@ def recommend_jobs(request, username):
         user_skill = extract_skills(text, skills)
         user_education = extract_education(text, education)
         user_qualification = f"{user_skill} {user_education}".strip()
+        print(user_qualification+ "qualifications")
 
         if not user_qualification:
             return Response({"error": "No qualifications extracted from resume"}, status=400)
