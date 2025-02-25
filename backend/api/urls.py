@@ -8,4 +8,5 @@ urlpatterns = [
     path('file/',views.file_upload,name="file_upload"),
     path('recommend/<str:username>/',views.recommend_jobs,name='recommend'),
     path('ats/',views.ats_score_computation,name='ats'),
+    path('save_job/',views.save_job,name='save'),
 ]
