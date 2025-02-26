@@ -56,7 +56,7 @@ const RecommendJob = () => {
   });
 
   const otherJobs = recommendationsData.filter(
-    (job) => job["Similarity"] <= 0.3
+    (job) => job["Similarity"] <= 0.3 && job["Similarity"] > 0
   );
   if (isPending) return <Loader />;
 
@@ -84,6 +84,13 @@ const RecommendJob = () => {
             Recommendations
           </p>
         )}
+        {recommendationsData.length == 1 &&
+          recommendationsData[0] == "Empty" && (
+            <p className="text-gray-600">
+              No job recommendations found. Please ensure your uploaded file is
+              a valid resume with relevant details.
+            </p>
+          )}
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {recommendationsData.map((job) => {
             if (job["Similarity"] > 0.3)
@@ -164,6 +171,7 @@ const RecommendJob = () => {
                   job_title: selectedJob["Job Title"],
                   job_description: selectedJob["Job Description"],
                   job_similarity: selectedJob["Similarity"],
+                  job_company: selectedJob["Company"],
                 })
               }
             >
