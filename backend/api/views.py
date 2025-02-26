@@ -81,27 +81,6 @@ def logout(request):
         return Response({"error":f"Error: {str(e)}"},status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-def file_upload(request):
-    print(request.headers.get('Authorization'))
-    if request.user.is_authenticated:
-        try:
-            print(request.user)
-            token=Token.objects.get(user=request.user).key
-            print(token)
-            if 'file' not in request.FILES:
-                return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
-            serializer = FileSerializer(data=request.data, context={'user': request.user})
-            if serializer.is_valid():
-                serializer.save()
-                token=Token.objects.get(user=request.user).key
-                print(Token.objects.get(user=request.user).key)
-                return JsonResponse({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
-        except ObjectDoesNotExist:
-            return Response({'error': 'Token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer.errors) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET', 'POST'])
 def file_upload(request):
@@ -141,8 +120,10 @@ def preprocess_text(text):
     
     words = []
     for token in tokens:
+        # Only process words that are at least 2 characters
         if len(token) > 1:
             stemmed_word = stemmer.stem(token)
+            # Check if the stemmed word is not a stopword
             if stemmed_word not in stop_words:
                 words.append(stemmed_word)
     
@@ -158,6 +139,7 @@ def compute_tf(text):
     tf_counter = Counter(tokens)
     total_words = len(tokens)
     
+    # Avoid division by zero
     if total_words == 0:
         return {}
         
@@ -165,20 +147,25 @@ def compute_tf(text):
 
 def compute_idf(documents):
     """Compute Inverse Document Frequency (IDF)"""
+    # Handle empty document list
     if not documents:
         return {}
         
     total_docs = len(documents)
     word_doc_count = Counter()
 
+    # Count documents containing each word
     for doc in documents:
+        # Process each document and get unique words
         processed_doc = preprocess_text(doc)
         if processed_doc:
             unique_words = set(processed_doc.split())
             word_doc_count.update(unique_words)
 
+    # Calculate IDF for each word with smoothing (add 1 to prevent division by zero)
     idf = {}
     for word, count in word_doc_count.items():
+        # Improved IDF formula with smoothing
         idf[word] = math.log((total_docs + 1) / (count + 1)) + 1
         
     return idf
@@ -190,6 +177,7 @@ def compute_tfidf_vector(text, idf_values):
         
     tf_values = compute_tf(text)
     
+    # Return TF-IDF for each word
     tfidf = {}
     for word in tf_values:
         tfidf[word] = tf_values[word] * idf_values.get(word, 0)
@@ -198,8 +186,10 @@ def compute_tfidf_vector(text, idf_values):
 
 def compute_tfidf(documents):
     """Compute TF-IDF for a list of documents"""
+    # Get IDF values for corpus
     idf = compute_idf(documents)
     
+    # Compute TF-IDF for each document
     tfidf_documents = []
     for doc in documents:
         tfidf = compute_tfidf_vector(doc, idf)
@@ -209,21 +199,28 @@ def compute_tfidf(documents):
 
 def cosine_similarity(vec1, vec2):
     """Compute cosine similarity between two vectors"""
+    # Handle empty vectors
     if not vec1 or not vec2:
         return 0.0
         
+    # Find common terms
     intersection = set(vec1.keys()) & set(vec2.keys())
     
+    # If no common terms, similarity is 0
     if not intersection:
         return 0.0
         
+    # Calculate dot product
     numerator = sum(vec1[x] * vec2[x] for x in intersection)
     
+    # Calculate magnitudes
     sum1 = sum(value ** 2 for value in vec1.values())
     sum2 = sum(value ** 2 for value in vec2.values())
     
+    # Calculate denominator (product of magnitudes)
     denominator = math.sqrt(sum1) * math.sqrt(sum2)
     
+    # Avoid division by zero
     if denominator == 0:
         return 0.0
         
@@ -235,7 +232,7 @@ def process_pdf(file_path, max_pages=3):
         with open(file_path, "rb") as f:
             reader = PdfReader(f)
             text = "".join(page.extract_text() or "" for page in reader.pages[:max_pages])
-            return text[:50000]  
+            return text[:50000]  # Limit to 50K characters
     except Exception as e:
         print(f"Error processing PDF: {str(e)}")
         return ""
@@ -264,7 +261,7 @@ def recommend_jobs(request, username):
         if not username:
             return Response({"error": "Username is required"}, status=400)
 
-  
+        # Retrieve user and uploaded resume
         user = CustomUser.objects.filter(username=username).first()
         print(user)
         if not user:
@@ -274,41 +271,41 @@ def recommend_jobs(request, username):
         if not file:
             return Response({"error": "No resume found"}, status=404)
 
-    
+        # Extract resume content
         text = process_pdf(file.file.path)
         print(text)
         if not text:
             return Response({"error": "Error processing resume"}, status=500)
 
-
+        # Extract skills and education from resume
         user_skill = extract_skills(text, skills)
         user_education = extract_education(text, education)
         user_qualification = f"{user_skill} {user_education}".strip()
         print(user_qualification+ "qualifications")
 
         if not user_qualification:
-             return JsonResponse({
-            "recommendations": ["Empty"],
-            "status": "success"
-        })
+            return Response({"error": "No qualifications extracted from resume"}, status=400)
 
-
+        # Load job data
         try:
             df = pd.read_csv("static/job_descriptions.csv")
-           
+            # Limit sample size for better performance if needed
             if len(df) > 10000:
-                df = df.sample(100000, random_state=42)
+                df = df.sample(10000, random_state=42)
                 
             if df.empty:
                 return Response({"error": "Job descriptions dataset is empty"}, status=500)
 
+            # Load cleaned job descriptions
             cleaned_df = pd.read_csv("static/cleaned_data.csv")
+            # Ensure same sample size and order as original dataframe
             if len(cleaned_df) > 10000:
-                cleaned_df = cleaned_df.sample(100000, random_state=42)
+                cleaned_df = cleaned_df.sample(10000, random_state=42)
                 
             if cleaned_df.empty:
                 return Response({"error": "Cleaned job descriptions dataset is empty"}, status=500)
 
+            # Combine skills and qualifications into a single list
             job_descriptions = []
             for _, row in cleaned_df.iterrows():
                 skills = str(row.get("skills", "")) if not pd.isna(row.get("skills", "")) else ""
@@ -318,26 +315,32 @@ def recommend_jobs(request, username):
         except Exception as e:
             return Response({"error": f"Error loading job data: {str(e)}"}, status=500)
 
+        # Compute TF-IDF for job descriptions
         job_tfidf_vectors, idf_values = compute_tfidf(job_descriptions)
         job_tfidf_vectors, idf_values = compute_tfidf(job_descriptions)
+        # Compute TF-IDF for user qualification
         user_tfidf = compute_tfidf_vector(user_qualification, idf_values)
-        print(user_tfidf)
         
+        # Compute similarities
         similarities = []
         for job_tfidf in job_tfidf_vectors:
             sim = cosine_similarity(user_tfidf, job_tfidf)
             similarities.append(sim)
         
+        # Add similarity scores to the dataframe
         df["Similarity"] = similarities
         
+        # Remove duplicates and sort by similarity
         top_jobs = df.sort_values(by="Similarity", ascending=False)
         top_jobs = top_jobs.drop_duplicates(subset=['Job Title'])
         
+        # Log some information for debugging
         print(f"User qualification length: {len(user_qualification.split())}")
         print(f"User TF-IDF terms: {len(user_tfidf)}")
         print(f"Number of job descriptions: {len(job_descriptions)}")
         print(f"Top similarity score: {top_jobs['Similarity'].max()}")
         
+        # Return top jobs (limited to 10)
         return JsonResponse({
             "recommendations": top_jobs.head(10).to_dict(orient="records"), 
             "status": "success"
@@ -347,7 +350,37 @@ def recommend_jobs(request, username):
         print(f"Unexpected error: {str(e)}")
         return Response({"error": "An unexpected error occurred", "details": str(e)}, status=500)
 
+def compute_tf_ats(text):
+    """
+    Compute Term Frequency for a document.
+    
+    Args:
+        text: List of words or string
+        
+    Returns:
+        Dictionary with word as key and term frequency as value
+    """
+    # Handle if text is a string
+    if isinstance(text, str):
+        words = text.split()
+    else:
+        words = text
+        
+    # Count word occurrences
+    word_count = {}
+    for word in words:
+        word_count[word] = word_count.get(word, 0) + 1
+    
+    # Calculate term frequency
+    tf_dict = {}
+    total_words = len(words)
+    for word, count in word_count.items():
+        tf_dict[word] = count / total_words
+        
+    return tf_dict
 
+@csrf_exempt
+@api_view(['POST'])
 def ats_score_computation(request):
     """Compute ATS score based on job description and resume similarity."""
     if request.method == "POST":
@@ -372,20 +405,23 @@ def ats_score_computation(request):
         if not job_description:
             return Response({"error": "No job description provided"}, status=400)
 
+         # Extract skills and education from job desc
         jobs_skill = extract_skills(job_description, skills)
         jobs_education = extract_education(job_description, education)
         jobs_qualification = f"{jobs_skill} {jobs_education}".strip()
         print("line 293", jobs_qualification)
 
+        # Clean job description
         cleaned_job_description = preprocess_text(jobs_qualification)
 
-        job_tf = compute_tf(cleaned_job_description)
+        # Compute TF-IDF
+        job_tf = compute_tf_ats(cleaned_job_description)
 
         user_tf = compute_tf(user_skill)
 
         vocabulary = set(job_tf.keys()).union(set(user_tf.keys()))
   
-        idf_jobs = compute_idf_ats([jobs_qualification, user_skill])
+        idf_jobs = compute_idf([jobs_qualification, user_skill])
     
 
         job_tfidf = {word: job_tf[word] * idf_jobs.get(word, 0) for word in job_tf}
@@ -409,21 +445,23 @@ def save_job(request):
         return Response({'error':"Only Post method is allowed"})
     job_title = request.data.get("job_title")
     job_description = request.data.get("job_description")
-    job_similarity = request.data.get("job_similarity", 0.0)  
     job_company=request.data.get("job_company")
+    job_similarity = request.data.get("job_similarity", 0.0)  # Optional
+
     if not job_title or not job_description:
         return Response(
             {"error": "Job title and job description are required."},
             status=400)
     try:
+        # Create a new SavedJob entry for the user.
         saved_job = SavedJob.objects.create(
             user=user,
             job_title=job_title,
+            job_company=job_company,
             job_description=job_description,
-            job_similarity=job_similarity,
-            job_company=job_company
+            job_similarity=job_similarity
         )
-        message = f"{user.username} has successfully saved the job: {job_title}"
+        message = f"{user.first_name} has successfully saved the job: {job_title}"
     except Exception as e:
         return Response(
             {"error": "Could not save job", "details": str(e)},
@@ -445,7 +483,6 @@ def applied_job(request):
     job_titles = [job.job_title for job in save_job]
     job_descriptions=[job.job_description for job in save_job]
     job_company_name=[job.job_company for job in save_job]
-   
     
     return Response({"username": user.username,
         "job_title": job_titles,
