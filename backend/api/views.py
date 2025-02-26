@@ -258,8 +258,6 @@ def process_pdf(file_path, max_pages=3):
         print(f"Error processing PDF: {str(e)}")
         return ""
 
-
-from .extract_skills import skills
 @api_view(["GET", "POST"])
 def recommend_jobs(request, username):
 
@@ -278,6 +276,7 @@ def recommend_jobs(request, username):
             "Business Administration", "Data Science", "Statistics", "Mathematics",
             "Artificial Intelligence", "Machine Learning", "Computer Engineering"
         ]
+    
     """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
     try:
         if not username:
@@ -461,3 +460,21 @@ def save_job(request):
 
     print(message)
     return Response({"message": message}, status=201)
+@api_view(['GET'])
+def applied_job(request):
+    try:
+        user = CustomUser.objects.get(username=request.user.username)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    save_job = SavedJob.objects.filter(user=user) 
+    print(save_job)
+    if not save_job:
+        return Response({"message": f"{user.username} has no saved jobs"})
+    job_titles = [job.job_title for job in save_job]
+    job_descriptions=[job.job_description for job in save_job]
+    job_company_name=[job.job_company for job in save_job]
+    
+    return Response({"username": user.username,
+        "job_title": job_titles,
+        "job_company":job_company_name,
+        "job_description":job_descriptions})
