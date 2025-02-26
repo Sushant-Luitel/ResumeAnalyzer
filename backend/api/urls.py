@@ -9,4 +9,5 @@ urlpatterns = [
     path('recommend/<str:username>/',views.recommend_jobs,name='recommend'),
     path('ats/',views.ats_score_computation,name='ats'),
     path('save_job/',views.save_job,name='save'),
+    path('applied_jobs/',views.applied_job,name='applied'),
 ]
