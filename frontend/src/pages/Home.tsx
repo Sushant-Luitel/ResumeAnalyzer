@@ -44,7 +44,7 @@ const Home = () => {
             <div className="grid md:grid-cols-3 gap-8">
               <div
                 className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out cursor-pointer"
-                onClick={() => navigate("/recommend-job")}
+                onClick={() => navigate("/applied-jobs")}
               >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
                   AI-Powered Resume Analysis

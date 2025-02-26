@@ -6,7 +6,6 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Loader from "../reusable/Loader";
-import { Link } from "react-router-dom";
 
 const RecommendJob = () => {
   const { files, username, password } = useAuth();
@@ -35,11 +34,30 @@ const RecommendJob = () => {
     if (files.length < 1) setRecommendationsData([]);
   }, [files]);
 
-  const handleApply = () => {
-    toast.success("Applied Successfully");
-    setSelectedJob(null);
-  };
+  const { mutate: applyJob } = useMutation({
+    mutationFn: async (data: unknown) => {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/save_job/`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Basic " + btoa(`${username}:${password}`),
+          },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      setSelectedJob(null);
+      toast.success("Applied Successfully");
+    },
+    onError: () => toast.error("Failed to apply for job."),
+  });
 
+  const otherJobs = recommendationsData.filter(
+    (job) => job["Similarity"] <= 0.3
+  );
   if (isPending) return <Loader />;
 
   return (
@@ -60,9 +78,15 @@ const RecommendJob = () => {
         <h1 className="text-3xl font-bold text-teal-800 mb-4">
           Recommended Jobs
         </h1>
+        {recommendationsData.length < 1 && (
+          <p className="text-gray-600">
+            No Recommendations. Upload Your Resume And Get Personalized
+            Recommendations
+          </p>
+        )}
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {recommendationsData.map((job) => {
-            if (job["Similarity"] > 0.4)
+            if (job["Similarity"] > 0.3)
               return (
                 <button
                   key={job["Job Id"]}
@@ -81,6 +105,33 @@ const RecommendJob = () => {
               );
           })}
         </div>
+        {otherJobs.length > 0 && (
+          <>
+            <h1 className="text-3xl font-bold text-teal-800  my-10">
+              You Might Also Consider Applying :
+            </h1>
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 my-4 ">
+              {otherJobs.map((job: any) => {
+                return (
+                  <button
+                    key={job["Job Id"]}
+                    onClick={() => setSelectedJob(job)}
+                    className="p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition border border-teal-300 cursor-pointer"
+                  >
+                    <h2 className="text-xl font-semibold text-teal-700">
+                      {job["Job Title"]}
+                    </h2>
+                    <p className="text-gray-700">{job["Company"]}</p>
+                    <p className="text-gray-600">{job["location"]}</p>
+                    <p className="text-teal-800 font-semibold">
+                      {job["Salary Range"]}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {selectedJob && (
@@ -108,7 +159,13 @@ const RecommendJob = () => {
 
             <Button
               className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md w-full hover:bg-teal-700 transition cursor-pointer"
-              onClick={handleApply}
+              onClick={() =>
+                applyJob({
+                  job_title: selectedJob["Job Title"],
+                  job_description: selectedJob["Job Description"],
+                  job_similarity: selectedJob["Similarity"],
+                })
+              }
             >
               Apply Now
             </Button>
