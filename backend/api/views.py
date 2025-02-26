@@ -312,7 +312,7 @@ def recommend_jobs(request, username):
             df = pd.read_csv("static/job_descriptions.csv")
             # Limit sample size for better performance if needed
             if len(df) > 10000:
-                df = df.sample(10000, random_state=42)
+                df = df.sample(100000, random_state=42)
                 
             if df.empty:
                 return Response({"error": "Job descriptions dataset is empty"}, status=500)
@@ -321,7 +321,7 @@ def recommend_jobs(request, username):
             cleaned_df = pd.read_csv("static/cleaned_data.csv")
             # Ensure same sample size and order as original dataframe
             if len(cleaned_df) > 10000:
-                cleaned_df = cleaned_df.sample(10000, random_state=42)
+                cleaned_df = cleaned_df.sample(100000, random_state=42)
                 
             if cleaned_df.empty:
                 return Response({"error": "Cleaned job descriptions dataset is empty"}, status=500)
@@ -451,7 +451,7 @@ def save_job(request):
             job_description=job_description,
             job_similarity=job_similarity
         )
-        message = f"{user.first_name} has successfully saved the job: {job_title}"
+        message = f"{user.username} has successfully saved the job: {job_title}"
     except Exception as e:
         return Response(
             {"error": "Could not save job", "details": str(e)},

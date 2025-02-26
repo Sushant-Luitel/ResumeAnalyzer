@@ -6,6 +6,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import Home from "./pages/Home";
 import RecommendJob from "./components/RecommendJob/RecommendJob";
 import CalculateATS from "./components/CalculateATS/CalculateATS";
+import AppliedJobsPage from "./components/AppliedJobs/AppliedJobs";
 
 export const Layout = () => {
   const location = useLocation();
@@ -39,6 +40,14 @@ export const Layout = () => {
           element={
             <ProtectedRoute>
               <RecommendJob />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/applied-jobs"
+          element={
+            <ProtectedRoute>
+              <AppliedJobsPage />
             </ProtectedRoute>
           }
         />
