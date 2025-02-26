@@ -47,11 +47,10 @@ const Home = () => {
                 onClick={() => navigate("/applied-jobs")}
               >
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  AI-Powered Resume Analysis
+                View Applied Jobs
                 </h3>
                 <p className="text-gray-600">
-                  Our AI evaluates resumes based on key metrics like skills,
-                  experience, and formatting to enhance their effectiveness.
+                View and track the jobs you have applied for with ease.
                 </p>
               </div>
               <div
@@ -108,11 +107,10 @@ const Home = () => {
               </div>
               <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">
-                  3. Download & Apply
+                  3. Apply
                 </h3>
                 <p className="text-gray-600">
-                  Download your optimized resume and apply for jobs with higher
-                  chances of success.
+                  Apply for jobs with higher chances of success.
                 </p>
               </div>
             </div>
