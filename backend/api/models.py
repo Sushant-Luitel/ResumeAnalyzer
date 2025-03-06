@@ -1,7 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser,User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password,check_password
 # Create your models here.
 def validate_file_extension(value):
     if not value.name.endswith(('.pdf', '.docx')):
@@ -9,11 +10,11 @@ def validate_file_extension(value):
 
 #Changed to Customuser
 class CustomUser(AbstractUser):  
-    username=models.CharField(max_length=50,unique=True,blank=False,null=False)
+    username=models.CharField(max_length=50,unique=True,blank=False)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     email=models.EmailField(max_length=100,blank=False,null=False)
-    # profile=models.ImageField(upload_to='profile/')
+
 
 class FileUpload(models.Model):
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
@@ -23,30 +24,25 @@ class FileUpload(models.Model):
     def __str__(self):
         return f"{self.user.username} has resume/cv {self.file.name}"
     
-class SavedJob(models.Model):
-    STATUS_CHOICES = [
-        ("I", "In Review"),
-        ("A", "Accepted"),
-        ("R", "Rejected")
-    ]
-    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
-    job_title=models.CharField(max_length=100)
-    job_description = models.TextField()
-    job_similarity=models.FloatField(default=0.0)
-    job_company=models.CharField(max_length=100)
-    applied_on=models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='I')
-    def __str__(self):
-        return f"{self.user } has applied to {self.job_title}"
+
     #For recruiter
 class Recruiter(models.Model):
-   
-    recruiter_name = models.CharField(max_length=100, blank=False, null=False)
-    recruiter_email = models.EmailField(blank=False)
+ 
+    username = models.CharField(max_length=50, unique=True, blank=False, null=False)
+    password = models.CharField(max_length=128, blank=False, null=False)  # For storing hashed password
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    email = models.EmailField(unique=True, blank=False, null=False)
     
 
     def __str__(self):
-        return self.recruiter_name
+        return self.username
+    def set_password(self, password):
+        """Manually hash the password before saving."""
+        self.password = make_password(password)
+    def check_password(self, password):
+        """Check the password using Django's check_password method."""
+        return check_password(password, self.password)
     
 class Job(models.Model):
     JOB_TYPES=[
@@ -78,3 +74,15 @@ class Job(models.Model):
         if self.expiry_time:
             return timezone.now() > self.expiry_time
         return False
+    
+class SavedJob(models.Model):
+    STATUS_CHOICES = [
+        ("I", "In Review"),
+        ("A", "Accepted"),
+        ("R", "Rejected")
+    ]
+    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    job=models.ForeignKey(Job,on_delete=models.CASCADE)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='I')
+    def __str__(self):
+        return f"{self.user } has applied to {self.job_title}"
