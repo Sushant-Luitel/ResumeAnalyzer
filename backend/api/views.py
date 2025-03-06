@@ -236,61 +236,35 @@ def process_pdf(file_path, max_pages=3):
     except Exception as e:
         print(f"Error processing PDF: {str(e)}")
         return ""
-
 @api_view(["GET", "POST"])
-def recommend_jobs(request, username):
-
-    skills = [
-            "Python", "Java", "JavaScript", "SQL", "NoSQL", "HTML", "CSS", "React",
-            "Angular", "Vue", "Node.js", "Django", "Flask", "Spring", "Docker",
-            "Kubernetes", "AWS", "Azure", "GCP", "Git", "REST API", "GraphQL",
-            "Machine Learning", "Data Analysis", "Data Science", "Tensorflow",
-            "PyTorch", "NLP", "Computer Vision", "Agile", "Scrum", "DevOps",
-            "CI/CD", "Testing", "Automation", "Leadership", "Communication"
-        ]
-        
-    education = [
-            "Bachelor", "Master", "PhD", "Associate", "Diploma", "Certificate",
-            "Computer Science", "Information Technology", "Engineering", 
-            "Business Administration", "Data Science", "Statistics", "Mathematics",
-            "Artificial Intelligence", "Machine Learning", "Computer Engineering"
-        ]
-    
-    """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
+def recommend_jobs(request, job_id):
+    """Recommend similar jobs based on the job a user applied to using TF-IDF and cosine similarity."""
     try:
-        if not username:
-            return Response({"error": "Username is required"}, status=400)
+        if not job_id:
+            print(job_id)
+            return Response({"error": "Job ID is required"}, status=400)
 
-        # Retrieve user and uploaded resume
-        user = CustomUser.objects.filter(username=username).first()
-        print(user)
-        if not user:
-            return Response({"error": "User not found"}, status=404)
-
-        file = FileUpload.objects.filter(user=user).last()
-        if not file:
-            return Response({"error": "No resume found"}, status=404)
-
-        # Extract resume content
-        text = process_pdf(file.file.path)
-        print(text)
-        if not text:
-            return Response({"error": "Error processing resume"}, status=500)
-
-        # Extract skills and education from resume
-        user_skill = extract_skills(text, skills)
-        user_education = extract_education(text, education)
-        user_qualification = f"{user_skill} {user_education}".strip()
-        print(user_qualification+ "qualifications")
-
-        if not user_qualification:
-            return Response({"error": "No qualifications extracted from resume"}, status=400)
+        # Retrieve the job user applied to
+        job = Job.objects.filter(id=job_id).first()
+        print(job.job_title)
+        print(job.job_description)
+        print(job.job_requirements)
+        print(job.location)
+        if not job:
+            return Response({"error": "Job not found"}, status=404)
+            
+        # Extract job details
+        job_qualification = f"{job.job_title} {job.job_description} {job.job_requirements} {job.location}".strip()
+        print(job_qualification)
+        if not job_qualification:
+            return Response({"error": "No qualifications extracted from the job"}, status=400)
 
         # Load job data
         try:
             df = pd.read_csv("static/job_descriptions.csv")
             # Limit sample size for better performance if needed
             if len(df) > 10000:
+               
                 df = df.sample(10000, random_state=42)
                 
             if df.empty:
@@ -298,6 +272,7 @@ def recommend_jobs(request, username):
 
             # Load cleaned job descriptions
             cleaned_df = pd.read_csv("static/cleaned_data.csv")
+            print(cleaned_df.head())
             # Ensure same sample size and order as original dataframe
             if len(cleaned_df) > 10000:
                 cleaned_df = cleaned_df.sample(10000, random_state=42)
@@ -310,41 +285,47 @@ def recommend_jobs(request, username):
             for _, row in cleaned_df.iterrows():
                 skills = str(row.get("skills", "")) if not pd.isna(row.get("skills", "")) else ""
                 quals = str(row.get("qualifications", "")) if not pd.isna(row.get("qualifications", "")) else ""
-                job_descriptions.append(f"{skills} {quals}".strip())
-
+                location = str(row.get("location","")) if not pd.isna(row.get("location","")) else ""
+                job_title = str(row.get("job_title","")) if not pd.isna(row.get("job_title","")) else ""
+                job_descriptions.append(f"{skills} {quals} {location} {job_title}".strip())
+            print(i for i in job_descriptions)
         except Exception as e:
             return Response({"error": f"Error loading job data: {str(e)}"}, status=500)
 
         # Compute TF-IDF for job descriptions
         job_tfidf_vectors, idf_values = compute_tfidf(job_descriptions)
-        job_tfidf_vectors, idf_values = compute_tfidf(job_descriptions)
-        # Compute TF-IDF for user qualification
-        user_tfidf = compute_tfidf_vector(user_qualification, idf_values)
+        
+        # Compute TF-IDF for the job qualification
+        job_tfidf = compute_tfidf_vector(job_qualification, idf_values)
         
         # Compute similarities
         similarities = []
-        for job_tfidf in job_tfidf_vectors:
-            sim = cosine_similarity(user_tfidf, job_tfidf)
+        for desc_tfidf in job_tfidf_vectors:
+            sim = cosine_similarity(job_tfidf, desc_tfidf)
             similarities.append(sim)
         
         # Add similarity scores to the dataframe
         df["Similarity"] = similarities
         
-        # Remove duplicates and sort by similarity
+        # Remove duplicates, exclude the current job, and sort by similarity
+        df = df[df["Job ID"] != job_id]  # Assuming Job ID column exists in the dataframe
         top_jobs = df.sort_values(by="Similarity", ascending=False)
         top_jobs = top_jobs.drop_duplicates(subset=['Job Title'])
         
         # Log some information for debugging
-        print(f"User qualification length: {len(user_qualification.split())}")
-        print(f"User TF-IDF terms: {len(user_tfidf)}")
+        print(f"Job qualification length: {len(job_qualification.split())}")
+        print(f"Job TF-IDF terms: {len(job_tfidf)}")
         print(f"Number of job descriptions: {len(job_descriptions)}")
         print(f"Top similarity score: {top_jobs['Similarity'].max()}")
         
-        # Return top jobs (limited to 10)
+        # Return top similar jobs (limited to 10)
         return JsonResponse({
             "recommendations": top_jobs.head(10).to_dict(orient="records"), 
             "status": "success"
         })
+        
+    except Exception as e:
+        return Response({"error": f"Error processing recommendation: {str(e)}"}, status=500)
 
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
@@ -448,7 +429,7 @@ def save_job(request):
     job_company=request.data.get("job_company")
     job_similarity = request.data.get("job_similarity", 0.0)  # Optional
 
-    if not job_title or not job_description:
+    if not job.job_title or not job.job_description:
         return Response(
             {"error": "Job title and job description are required."},
             status=400)
@@ -470,6 +451,7 @@ def save_job(request):
 
     print(message)
     return Response({"message": message}, status=201)
+
 @api_view(['GET'])
 def applied_job(request):
     try:
@@ -480,7 +462,7 @@ def applied_job(request):
     print(save_job)
     if not save_job:
         return Response({"message": f"{user.username} has no saved jobs"})
-    job_titles = [job.job_title for job in save_job]
+    
     job_descriptions=[job.job_description for job in save_job]
     job_company_name=[job.job_company for job in save_job]
     
