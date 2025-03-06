@@ -1,12 +1,13 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
-import Login from "./components/auth/Login/Login";
 import Register from "./components/auth/Register/Register";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Home from "./pages/Home";
 import RecommendJob from "./components/RecommendJob/RecommendJob";
 import CalculateATS from "./components/CalculateATS/CalculateATS";
 import AppliedJobsPage from "./components/AppliedJobs/AppliedJobs";
+import Login from "./components/auth/Login/Login";
+import JobDetails from "./components/JobDetails/JobDetails";
 
 export const Layout = () => {
   const location = useLocation();
@@ -24,6 +25,14 @@ export const Layout = () => {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs/:jobId"
+          element={
+            <ProtectedRoute>
+              <JobDetails />
             </ProtectedRoute>
           }
         />
