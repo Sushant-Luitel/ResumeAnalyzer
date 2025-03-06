@@ -10,4 +10,9 @@ urlpatterns = [
     path('ats/',views.ats_score_computation,name='ats'),
     path('save_job/',views.save_job,name='save'),
     path('applied_jobs/',views.applied_job,name='applied'),
+    #for recruiter
+    path('recruiter_login/',views.recruiter_login,name='recruiterLogin'),
+    path('recruiter_logout/',views.recruiter_logout,name='recruiterLogout'),
+    path('recruiter_register/',views.recruiter_register,name='recruiterRegister'),
+    path('job/',views.job,name='job'),
 ]
