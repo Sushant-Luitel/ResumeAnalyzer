@@ -1,32 +1,34 @@
-from django.http import JsonResponse
+#rest_framework
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CustomUserSerializer,FileSerializer
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.hashers import check_password
+#imports from the serializer and model file
+from .serializers import CustomUserSerializer,FileSerializer,JobSerializer,RecruiterSerializer
+from .models import CustomUser, FileUpload , SavedJob,Recruiter,Job
+#django
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from .models import CustomUser, FileUpload , SavedJob
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
-import pickle
+from django.http import JsonResponse
+#numpy pandas
 import pandas as pd
 import math
 from PyPDF2 import PdfReader
 from collections import Counter
-from rest_framework.response import Response
-from django.http import JsonResponse
+#regular expression
 import re
+#nltk
+import pickle
 import nltk
 from nltk.corpus import stopwords as StopWords
 from nltk.stem import PorterStemmer
-
 from nltk.corpus import stopwords
-
-# import pypdf
-from PyPDF2 import PdfReader
 from .extract_skills import extract_skills,extract_education,skills,education
 @api_view(['GET','POST'])
 def home(request):
@@ -38,17 +40,17 @@ def register_user(request):
     if request.method == "POST":
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
+            # print(serializer.data)
+            print(request.data)
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-
 @api_view(['POST'])
 def login(request):
     if request.method == "POST":
         username = request.data.get('username')
         password = request.data.get('password')
-        print(username)
         csrf_token = get_token(request)
         # Ensure username and password are provided
         if not username or not password:
@@ -57,7 +59,6 @@ def login(request):
         # Authenticate user
         user = authenticate(username=username, password=password)
 
-        # Check if authentication failed
         if user is None:
             return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -66,8 +67,6 @@ def login(request):
         print(token.key)
         return Response({"token": token.key,'csrfToken': csrf_token,'username':user.username,'password':user.password}, status=status.HTTP_200_OK)
     
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
@@ -79,8 +78,6 @@ def logout(request):
             return Response({"message":"Logout Success"},status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error":f"Error: {str(e)}"},status=status.HTTP_400_BAD_REQUEST)
-
-
 
 @api_view(['GET', 'POST'])
 def file_upload(request):
@@ -103,10 +100,114 @@ def file_upload(request):
     except ObjectDoesNotExist:
         return Response({'error': 'Token does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
+#For Recruiter
+@api_view(['POST'])
+def recruiter_register(request):
+    if request.method == "POST":
+        username = request.data.get('username')
+        email = request.data.get('email')
+        if Recruiter.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        if Recruiter.objects.filter(email=email).exists():
+            return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = RecruiterSerializer(data=request.data)
+        if serializer.is_valid():
+            print(request.data)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+from rest_framework_simplejwt.tokens import RefreshToken
+# @csrf_exempt
+@api_view(['POST'])
+def recruiter_login(request):
+    if request.method == "POST":
+        username = request.data.get('username')
+        password = request.data.get('password')
+        print(username,password)
+        if not username or not password:
+            return Response({"error": "Username and Password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            recruiter = Recruiter.objects.get(username=username)
+            print(recruiter.username)
+        except Recruiter.DoesNotExist:
+            return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not recruiter.check_password(password):
+            return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = RefreshToken.for_user(recruiter)
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'username': recruiter.username,
+        }, status=status.HTTP_200_OK)
+    
+@permission_classes([IsAuthenticated])   
+@api_view(['GET','POST','DELETE','PUT'])
+def job(request):
+    print(f"{request.user} *****" )
+    if request.method == "POST":
+        try:
+            print(request.user.username)
+            recruiter = Recruiter.objects.get(username=request.user.username)
+        except Recruiter.DoesNotExist:
+            return Response({"error": "Recruiter not found"}, status=404)
+        job_data=request.data
+        job_data['recruiter'] = recruiter.id
+        serializer = JobSerializer(data=job_data,context={'request':request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Job created successfully"}, status=status.HTTP_201_CREATED)
+        else:   
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method=="GET":
+        jobs=Job.objects.all()
+        serializer = JobSerializer(jobs, many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    elif request.method=="DELETE":
+        job_id=request.data.get('id')
+        try:
+            job=Job.objects.get(id=job_id)
+            job.delete()
+        except:
+            return Response({'error':'Job Not Found'},status=status.HTTP_404_NOT_FOUND)
+        
+    elif request.method=="PUT":
+        job_id = request.data.get('id')
+        try:
+            job = Job.objects.get(id=job_id)
+            serializer = JobSerializer(job, data=request.data, partial=True)  
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "Job updated successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def recruiter_logout(request):
+    try:
+        print(request.username)
+        token=Token.objects.get(user=request.user)
+        if token:
+            token.delete()
+            return Response({"message":"Logout Success"},status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error":f"Error: {str(e)}"},status=status.HTTP_400_BAD_REQUEST)
+    
+        
+#updating the status of the job applied by the user 
+@api_view(['POST','GET'])
+def recruiter_update_status(request):
+    #todo
+    pass
 
 nltk.download("stopwords")
-
 stemmer = PorterStemmer()
 stop_words = set(stopwords.words("english"))
 
@@ -404,17 +505,11 @@ def ats_score_computation(request):
         job_description = request.data.get("job_description", " ")
         if not job_description:
             return Response({"error": "No job description provided"}, status=400)
-
-         # Extract skills and education from job desc
         jobs_skill = extract_skills(job_description, skills)
         jobs_education = extract_education(job_description, education)
         jobs_qualification = f"{jobs_skill} {jobs_education}".strip()
         print("line 293", jobs_qualification)
-
-        # Clean job description
         cleaned_job_description = preprocess_text(jobs_qualification)
-
-        # Compute TF-IDF
         job_tf = compute_tf_ats(cleaned_job_description)
 
         user_tf = compute_tf(user_skill)
@@ -422,12 +517,8 @@ def ats_score_computation(request):
         vocabulary = set(job_tf.keys()).union(set(user_tf.keys()))
   
         idf_jobs = compute_idf([jobs_qualification, user_skill])
-    
-
         job_tfidf = {word: job_tf[word] * idf_jobs.get(word, 0) for word in job_tf}
         user_tfidf = {word: user_tf[word] * idf_jobs.get(word, 0) for word in user_tf}
-
-
         similarity = cosine_similarity(user_tfidf, job_tfidf)
 
         return Response({"similarity_score": similarity, "status": "success"}, status=200)
@@ -443,9 +534,15 @@ def save_job(request):
             return Response({"error": "User not found"}, status=404)
     else:
         return Response({'error':"Only Post method is allowed"})
+    recruiter=request.data.get("recruiter")
+    company_name=request.data.get("company_name") #added more fields of the job
+    location=request.data.get("location")
     job_title = request.data.get("job_title")
     job_description = request.data.get("job_description")
-    job_company=request.data.get("job_company")
+    job_requirements=request.data.get("job_requirements")
+    salary=request.data.get("salary")
+    job_type=request.data.get("posted_at")
+    expiry_time=request.data.get("expiry_time")
     job_similarity = request.data.get("job_similarity", 0.0)  # Optional
 
     if not job_title or not job_description:
@@ -454,14 +551,20 @@ def save_job(request):
             status=400)
     try:
         # Create a new SavedJob entry for the user.
-        saved_job = SavedJob.objects.create(
+        save_job = SavedJob.objects.create(
             user=user,
             job_title=job_title,
-            job_company=job_company,
+            company_name=company_name,
+            location=location,
             job_description=job_description,
+            job_requirements=job_requirements, #added more fields of the job
+            job_type=job_type,
+            expiry_time=expiry_time,
+            salary=salary,
             job_similarity=job_similarity
         )
         message = f"{user.first_name} has successfully saved the job: {job_title}"
+        return Response({"save_job":save_job})
     except Exception as e:
         return Response(
             {"error": "Could not save job", "details": str(e)},
@@ -480,11 +583,19 @@ def applied_job(request):
     print(save_job)
     if not save_job:
         return Response({"message": f"{user.username} has no saved jobs"})
-    job_titles = [job.job_title for job in save_job]
     job_descriptions=[job.job_description for job in save_job]
-    job_company_name=[job.job_company for job in save_job]
+    company_name=[job.job_company for job in save_job]
+    location=[job.location for job in save_job]
+    job_title=[job.job_title for job in save_job]
+    salary=[job.salary for job in save_job]
+    job_requirements=[job.job_requirements for job in save_job]
+    posted_at=[job.posted_at for job in save_job]
     
     return Response({"username": user.username,
-        "job_title": job_titles,
-        "job_company":job_company_name,
-        "job_description":job_descriptions})
+        "job_title": job_title,
+        "job_company":company_name,
+        "job_description":job_descriptions,
+        "job_requirements":job_requirements,
+        "salary":salary,
+        "location":location,
+        })
