@@ -11,6 +11,28 @@ class CustomUserAdmin(UserAdmin):
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(FileUpload)
-admin.site.register(SavedJob)
-admin.site.register(Job)
-admin.site.register(Recruiter)
+@admin.register(SavedJob)
+class SavedJobAdmin(admin.ModelAdmin):
+    list_display = ('user', 'job', 'status')
+    list_filter = ('status',)
+    list_editable = ('status',)
+    
+
+# Job Admin
+@admin.register(Job)
+class JobAdmin(admin.ModelAdmin):
+    list_display = ('job_title', 'company_name', 'location', 'job_type', 'posted_at','get_recruiter_name')
+    list_filter = ('job_type', 'posted_at', 'location')
+    search_fields = ('job_title', 'company_name', 'location')
+    ordering = ('-posted_at',)
+
+    def get_recruiter_name(self,obj):
+        return obj.recruiter.username
+    get_recruiter_name.short_description = 'Recruiter Name'
+
+# Recruiter Admin
+@admin.register(Recruiter)
+class RecruiterAdmin(admin.ModelAdmin):
+    model = Recruiter
+    list_display = ('username', 'email', )
+    search_fields = ('username', 'email', )
