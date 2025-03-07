@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     email=models.EmailField(max_length=100,blank=False,null=False)
-    # profile=models.FileField(upload_to='profile/')
+
 
 class FileUpload(models.Model):
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
@@ -60,7 +60,7 @@ class Job(models.Model):
     job_description=models.TextField()
     job_requirements=models.TextField()
     posted_at=models.DateTimeField(auto_now_add=True)
-    expiry_time=models.DateTimeField(null=False,blank=False)
+    expiry_time=models.DateField(null=False,blank=False)
     is_active=models.BooleanField(default=True)
     
 
@@ -85,4 +85,4 @@ class SavedJob(models.Model):
     job=models.ForeignKey(Job,on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='I')
     def __str__(self):
-        return f"{self.user } has applied to {self.job.job_title}"
+        return f"{self.user } has applied to {self.job_title}"
