@@ -1,30 +1,24 @@
 import re
-global skills,education
-# List of skills and education keywords
-skills = [
-    'Python', 'Django', 'Machine Learning', 'JavaScript', 'React', 'SQL', 'Java', 
-    'Node.js', 'HTML', 'CSS', 'Microsoft office', 'Flask', 'Keras', 'TensorFlow', 
-    'Ruby', 'C++', 'PHP', 'PostgreSQL', 'AWS', 'Azure', 'Git', 'Docker', 'Angular',
-    'MySQL', 'PostgreSQL', 'Frontend Framework', 'Backend Framework', 'Django Rest Framework',
-    'ReactJS', 'React Native', 'Rust', 'NoSQL', 'Vue', 'Spring', 'GCP', 'REST API',
-    'GraphQL', 'Data Analysis', 'Data Science', 'PyTorch', 'NLP', 'Computer Vision',
-    'Agile', 'Scrum', 'DevOps', 'CI/CD', 'Testing', 'Automation', 'Leadership', 
-    'Communication', 'Flutter', 'Swift', 'Kotlin', 'Jetpack Compose', 'Xamarin', 
-    'Cordova', 'Ionic', 'Unity', 'Ethical Hacking', 'Penetration Testing', 'Network Security', 
-    'OWASP', 'SIEM', 'Burp Suite', 'Metasploit', 'Snort', 'Nmap', 'Wireshark', 'SOC Analysis', 
-    'Threat Hunting', 'Incident Response', 'Zero Trust Security', 'Scikit-learn', 'OpenCV', 
-    'Hugging Face Transformers', 'Speech Recognition', 'Reinforcement Learning', 'Generative AI', 
-    'LLMs', 'Data Visualization', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn', 'Plotly', 'Dash', 
-    'Power BI', 'Tableau', 'Google Data Studio', 'Excel', 'Big Data', 'ETL', 'Airflow', 
-    'Data Wrangling', 'Unit Testing', 'Integration Testing', 'Selenium', 'Cypress', 'JUnit', 
-    'PyTest', 'Mocha', 'Jest', 'Postman', 'Fuzzing', 'Test Automation', 'Load Testing',
-    'Blockchain', 'Ethereum', 'Solidity', 'Hyperledger', 'Smart Contracts', 'IPFS', 
-    'DeFi', 'NFTs', 'Web3.js', 'Hardhat', 'Truffle', 'IoT', 'Embedded Systems', 
-    'Arduino', 'Raspberry Pi', 'MQTT', 'Edge Computing', 'Unreal Engine', 'Godot', 
-    'Cocos2d', 'Game AI', 'Shader Programming', 'Project Management', 'Problem Solving', 
-    'Critical Thinking'
-]
+import pandas as pd
 
+# Use a raw string (r'...') to avoid issues with backslashes
+file_path = r'C:\Users\srija\Desktop\New folder\ResumeAnalyzer\ResumeAnalyzer\backend\static\skills.csv'
+column_name = "skills"  # Ensure this matches the actual column name in your CSV
+
+try:
+    # Try reading with UTF-8 encoding
+    df = pd.read_csv(file_path, encoding='utf-8')
+except UnicodeDecodeError:
+    # If UTF-8 fails, try Latin-1 encoding
+    df = pd.read_csv(file_path, encoding='latin1')
+
+# Ensure the column exists in the dataframe
+if column_name in df.columns:
+    # Extract the skills column and drop NaN values
+    skills = df[column_name].dropna().tolist()
+    print(skills)
+else:
+    print(f"Error: Column '{column_name}' not found in the CSV file.")
 
 education = [
     'MBA', 'Bsc.CSIT', 'BIM', 'Btech', 'Phd', 'Msc', 'Bsc', 'BBA', 'BBS', 'Bsc.IT', 'Bsc.CS', 'Bsc.CSIT',
