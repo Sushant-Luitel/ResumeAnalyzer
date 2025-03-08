@@ -62,3 +62,13 @@ class JobSerializer(serializers.ModelSerializer):
         #     raise serializers.ValidationError({"recruiter": "Only recruiters can post jobs."}) # Assuming the recruiter is the logged-in user
         # validated_data['recruiter'] = recruiter 
         return Job.objects.create(**validated_data)
+
+from .models import SavedJob
+
+class SavedJobSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()  # Returns username instead of ID
+    job = serializers.StringRelatedField()   # Returns job title instead of ID
+
+    class Meta:
+        model = SavedJob
+        fields = ['id', 'user', 'job', 'status']
