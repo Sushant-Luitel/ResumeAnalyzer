@@ -30,6 +30,7 @@ from nltk.corpus import stopwords as StopWords
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 from .extract_skills import extract_skills,extract_education,skills,education
+print(skills)
 @api_view(['GET','POST'])
 def home(request):
     return Response("hpa", status=status.HTTP_200_OK)
@@ -350,22 +351,8 @@ def process_pdf(file_path, max_pages=3):
 @api_view(["GET", "POST"])
 def recommend_jobs(request, username):
 
-    skills = [
-            "Python", "Java", "JavaScript", "SQL", "NoSQL", "HTML", "CSS", "React",
-            "Angular", "Vue", "Node.js", "Django", "Flask", "Spring", "Docker",
-            "Kubernetes", "AWS", "Azure", "GCP", "Git", "REST API", "GraphQL",
-            "Machine Learning", "Data Analysis", "Data Science", "Tensorflow",
-            "PyTorch", "NLP", "Computer Vision", "Agile", "Scrum", "DevOps",
-            "CI/CD", "Testing", "Automation", "Leadership", "Communication"
-        ]
-        
-    education = [
-            "Bachelor", "Master", "PhD", "Associate", "Diploma", "Certificate",
-            "Computer Science", "Information Technology", "Engineering", 
-            "Business Administration", "Data Science", "Statistics", "Mathematics",
-            "Artificial Intelligence", "Machine Learning", "Computer Engineering"
-        ]
-    
+    print(skills)
+
     """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
     try:
         if not username:
@@ -418,9 +405,9 @@ def recommend_jobs(request, username):
             # Combine skills and qualifications into a single list
             job_descriptions = []
             for _, row in cleaned_df.iterrows():
-                skills = str(row.get("skills", "")) if not pd.isna(row.get("skills", "")) else ""
+                skill = str(row.get("skills", "")) if not pd.isna(row.get("skills", "")) else ""
                 quals = str(row.get("qualifications", "")) if not pd.isna(row.get("qualifications", "")) else ""
-                job_descriptions.append(f"{skills} {quals}".strip())
+                job_descriptions.append(f"{skill} {quals}".strip())
 
         except Exception as e:
             return Response({"error": f"Error loading job data: {str(e)}"}, status=500)
