@@ -170,7 +170,6 @@ const RecommendJob = () => {
                 applyJob({
                   job_title: selectedJob["Job Title"],
                   job_description: selectedJob["Job Description"],
-                  job_similarity: selectedJob["Similarity"],
                   job_company: selectedJob["Company"],
                 })
               }

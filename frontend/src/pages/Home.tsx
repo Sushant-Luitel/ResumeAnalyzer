@@ -1,9 +1,12 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import JobCard from "../components/JobCard";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import ResumeUpload from "../components/ResumeUpload/ResumeUpload";
+import { useAuth } from "../context/authContext";
+import { toast } from "react-toastify";
 
 export default function Home() {
   const {
@@ -52,6 +55,8 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      <ResumeUpload />
 
       {/* Job Listings */}
       <div className="m-10">
