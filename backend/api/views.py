@@ -61,11 +61,11 @@ def login(request):
 
         if user is None:
             return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        fullName=f"{user.first_name}  {user.last_name}"
         # If user is authenticated, create or get the token
         token, created = Token.objects.get_or_create(user=user)
         print(token.key)
-        return Response({"token": token.key,'csrfToken': csrf_token,'username':user.username,'password':user.password}, status=status.HTTP_200_OK)
+        return Response({"token": token.key,'csrfToken': csrf_token,'username':user.username,'fullName':fullName,'password':user.password}, status=status.HTTP_200_OK)
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -188,6 +188,12 @@ def job(request):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
+@api_view(['GET'])
+def get_job(request, id):
+    job = get_object_or_404(Job, id=id)  # Fetch job or return 404
+    serializer = JobSerializer(job)  # Serialize the job object
+    return Response(serializer.data, status=status.HTTP_200_OK)  # Return serialized data
+
 
 @api_view(['GET'])
 def recruiter_logout(request):

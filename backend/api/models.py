@@ -57,7 +57,7 @@ class Job(models.Model):
     location=models.CharField(max_length=100,blank=False,null=False)
     job_title=models.CharField(max_length=100,blank=False,null=False)
     salary=models.DecimalField(max_digits=10,decimal_places=2,null=True,blank=False)
-    job_type=models.CharField(max_length=100,choices=JOB_TYPES,default="FT")
+    job_type=models.CharField(max_length=100,choices=JOB_TYPES,default="Full-Time")
     job_description=models.TextField()
     job_requirements=models.TextField()
     posted_at=models.DateTimeField(auto_now_add=True)
@@ -84,6 +84,6 @@ class SavedJob(models.Model):
     ]
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     job=models.ForeignKey(Job,on_delete=models.CASCADE)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='I')
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='IN Review')
     def __str__(self):
         return f"{self.user } has applied to {self.job_title}"

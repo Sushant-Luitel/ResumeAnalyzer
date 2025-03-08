@@ -9,9 +9,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
     def create(self,validated_data):
         user=CustomUser(
             username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
         )
         user.set_password(validated_data['password'])
         user.save()
+        CustomUser.objects.create_user(user)
         return user
 
 
@@ -52,7 +55,7 @@ class RecruiterSerializer(serializers.ModelSerializer):
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model=Job
-        fields=['recruiter','company_name','location','job_title','salary','job_type','job_description','job_requirements','expiry_time']
+        fields=['id','recruiter','company_name','location','job_title','salary','job_type','job_description','job_requirements','expiry_time']
     def create(self, validated_data):
         recruiter = self.context['request'].user 
         print(recruiter.username)
