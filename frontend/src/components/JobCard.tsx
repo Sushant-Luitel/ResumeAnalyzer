@@ -12,16 +12,16 @@ export default function JobCard({ job }) {
       <div className="p-4">
         <div className="flex justify-between">
           <div className="flex gap-3">
-            <div
+            {/* <div
               className="h-10 w-10 rounded flex items-center justify-center text-white text-xs font-bold"
               style={{ backgroundColor: job.company.color }}
             >
               {job.company.logo}
-            </div>
+            </div> */}
             <div>
               <h3 className="font-medium dark:text-white">{job.title}</h3>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {job.company.name} • {job.location}
+                {job.company_name} • {job.location}
               </div>
             </div>
           </div>
@@ -32,14 +32,14 @@ export default function JobCard({ job }) {
             variant="outline"
             className="text-xs font-normal dark:border-gray-600"
           >
-            {job.type}
+            {job.job_type}
           </Badge>
-          <Badge
+          {/* <Badge
             variant="outline"
             className="text-xs font-normal dark:border-gray-600"
           >
             {job.remote ? "Remote" : "On-site"}
-          </Badge>
+          </Badge> */}
           <Badge
             variant="outline"
             className="text-xs font-normal dark:border-gray-600"
@@ -50,7 +50,7 @@ export default function JobCard({ job }) {
 
         <div className="mt-4 flex items-center justify-between">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            {job.postedTime}
+            {job.expiry_time}
           </div>
           <div className="font-medium dark:text-white">{job.salary}</div>
         </div>

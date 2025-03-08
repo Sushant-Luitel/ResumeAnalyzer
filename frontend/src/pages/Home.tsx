@@ -1,9 +1,19 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import JobCard from "../components/JobCard";
-import { jobListings } from "../data/job-listings";
+import axios from "axios";
 
 export default function Home() {
+  const { data: jobListings } = useQuery({
+    queryKey: ["JobListings"],
+    queryFn: async () => {
+      const response = await axios.get("http://127.0.0.1:8000/job/");
+      return response.data;
+    },
+  });
+
+  console.log(jobListings, "jobListings");
   return (
     <>
       {/* Greeting and Banner */}
@@ -20,12 +30,12 @@ export default function Home() {
       <div className="m-10">
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-medium">
-            {jobListings.length.toLocaleString()} Jobs Found
+            {jobListings?.length?.toLocaleString()} Jobs Found
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {jobListings.map((job) => (
+          {jobListings?.map((job) => (
             <JobCard key={job.id} job={job} />
           ))}
         </div>

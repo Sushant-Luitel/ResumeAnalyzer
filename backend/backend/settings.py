@@ -46,16 +46,11 @@ INSTALLED_APPS = [
 ]
 REST_FRAMEWORK = {
     # Set the default permission classes (ensure only one definition)
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Require authentication for all views
+     'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
     ],
     
-    # Set the default authentication classes
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT authentication
-        'rest_framework.authentication.SessionAuthentication',  # Optionally, support session authentication
-        'rest_framework.authentication.BasicAuthentication',  # Optionally, support basic authentication
-    ),
+ 
 }
 
 MIDDLEWARE = [

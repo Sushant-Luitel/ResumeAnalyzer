@@ -60,7 +60,7 @@ class Job(models.Model):
     job_description=models.TextField()
     job_requirements=models.TextField()
     posted_at=models.DateTimeField(auto_now_add=True)
-    expiry_time=models.DateField(null=False,blank=False)
+    expiry_time=models.DateTimeField(null=False,blank=False)
     is_active=models.BooleanField(default=True)
     
 
