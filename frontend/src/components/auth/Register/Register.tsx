@@ -1,151 +1,82 @@
-import { Box, Button } from "@mantine/core";
-import styles from "./register.module.css";
-import { Link } from "react-router-dom";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { registrationSchema } from "./RegistrationSchema";
-import * as yup from "yup";
-import InputField from "../../reusable/InputField";
-import EyeIcon from "../../../assets/svgs/EyeIcon";
-import { useState } from "react";
-import EyeCloseIcon from "../../../assets/svgs/EyeCloseIcon";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-import { useAuth } from "../../../context/authContext";
+export default function JobDetails() {
+  const { jobId } = useParams();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-export type UserRegistration = yup.InferType<typeof registrationSchema>;
+  useEffect(() => {
+    async function fetchJob() {
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch job details");
+        }
+        const data = await response.json();
+        setJob(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchJob();
+  }, [jobId]);
 
-const Register = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    clearErrors,
-  } = useForm<UserRegistration>({
-    resolver: yupResolver(registrationSchema),
-    mode: "onBlur",
-  });
+  if (loading) {
+    return (
+      <div className="text-center text-blue-500">Loading job details...</div>
+    );
+  }
 
-  const { registerUser, isRegisterPending } = useAuth();
-
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
-
-  const onSubmit: SubmitHandler<UserRegistration> = (data: any) => {
-    const updatedUserData = {
-      ...data,
-      username: data.userName,
-    };
-    delete updatedUserData.userName;
-
-    registerUser(updatedUserData);
-  };
+  if (error) {
+    return <div className="text-center text-red-500">Error: {error}</div>;
+  }
 
   return (
-    <Box className={styles["main-wrapper"]}>
-      <Box className={styles["wrapper"]}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <h1>Register</h1>
-          <InputField
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            register={register}
-            clearErrors={clearErrors}
-          />
-          {errors.firstName && (
-            <p className="error-message">{errors.firstName.message}</p>
-          )}
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+      {/* Job Header */}
+      <div className="flex gap-4 items-center">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">{job.job_title}</h1>
+          <p className="text-sm text-gray-600">
+            {job.company_name} • {job.location}
+          </p>
+        </div>
+      </div>
 
-          <Box className={styles["input-box"]}>
-            <InputField
-              type="text"
-              placeholder="Last Name"
-              name={"lastName"}
-              register={register}
-              clearErrors={clearErrors}
-            />
-          </Box>
-          {errors.lastName && (
-            <p className="error-message">{errors.lastName.message}</p>
-          )}
-          <Box className={styles["input-box"]}>
-            <InputField
-              type="text"
-              placeholder="Username"
-              name="userName"
-              clearErrors={clearErrors}
-              register={register}
-            />
-          </Box>
-          {errors.userName && (
-            <p className="error-message">{errors.userName.message}</p>
-          )}
+      {/* Job Tags */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="px-3 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded">
+          {job.job_type === "FT" ? "Full-Time" : "Part-Time"}
+        </span>
+      </div>
 
-          <Box pos={"relative"}>
-            <Box className={styles["input-box"]}>
-              <InputField
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="password"
-                register={register}
-                clearErrors={clearErrors}
-              />
-            </Box>
-            <Box
-              style={{
-                cursor: "pointer",
-                position: "absolute",
-                right: "20px",
-                top: "18px",
-              }}
-              onClick={() => setShowPassword((prev) => !prev)}
-            >
-              {showPassword ? <EyeIcon /> : <EyeCloseIcon />}
-            </Box>
-          </Box>
-          {errors.password && (
-            <p className="error-message">{errors.password.message}</p>
-          )}
-          <Box pos={"relative"}>
-            <Box className={styles["input-box"]}>
-              <InputField
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                register={register}
-                clearErrors={clearErrors}
-              />
-            </Box>
-            <Box
-              style={{
-                cursor: "pointer",
-                position: "absolute",
-                right: "20px",
-                top: "18px",
-              }}
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-            >
-              {showConfirmPassword ? <EyeIcon /> : <EyeCloseIcon />}
-            </Box>
-          </Box>
+      {/* Job Description */}
+      <p className="mt-4 text-gray-700">{job.job_description}</p>
 
-          {errors.confirmPassword && (
-            <p className="error-message">{errors.confirmPassword.message}</p>
-          )}
+      {/* Job Requirements */}
+      <h3 className="mt-6 text-lg font-semibold text-gray-900">Requirements</h3>
+      <ul className="list-disc pl-5 text-gray-700">
+        {job.job_requirements.split("\r\n").map((req, idx) => (
+          <li key={idx}>{req}</li>
+        ))}
+      </ul>
 
-          <button type="submit" className={styles["btn"]}>
-            Submit
-          </button>
-          <Box className={styles["register-link"]}>
-            <p>
-              Already Have an account? <Link to={"/login"}>Go To Login</Link>
-            </p>
-          </Box>
-        </form>
-      </Box>
-    </Box>
+      {/* Footer Section */}
+      <div className="mt-6 flex items-center justify-between">
+        <span className="text-lg font-semibold text-gray-900">
+          NPR {Number(job.salary).toLocaleString()}
+        </span>
+        <span className="text-xs text-gray-500">
+          Expiry Date: {new Date(job.expiry_time).toDateString()}
+        </span>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Apply Now
+        </button>
+      </div>
+    </div>
   );
-};
-
-export default Register;
+}

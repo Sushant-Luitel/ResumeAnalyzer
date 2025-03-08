@@ -84,6 +84,6 @@ class SavedJob(models.Model):
     ]
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     job=models.ForeignKey(Job,on_delete=models.CASCADE)
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='IN Review')
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='In Review')
     def __str__(self):
         return f"{self.user } has applied to {self.job_title}"

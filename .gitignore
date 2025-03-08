@@ -5,6 +5,8 @@
 backend/backend/__pycache__
 /backend/__pycache__
 /api/__pycache__
+**/__pycache__/
+
 *.sqlite3
 
 # Virtual environments
