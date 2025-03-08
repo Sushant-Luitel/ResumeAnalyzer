@@ -46,10 +46,11 @@ class Recruiter(models.Model):
     
 class Job(models.Model):
     JOB_TYPES=[
-        ("IN","Intern"),
-        ("FT","Full-Time"),
-        ("PT","Part-Time"),
-        ("TP","Temporary"),("CT","Contract")
+        ("Intern","Intern"),
+        ("Full-Time","Full-Time"),
+        ("Part-Time","Part-Time"),
+        ("Temporary","Temporary"),
+        ("Contract","Contract")
     ]
     recruiter=models.ForeignKey(Recruiter,on_delete=models.CASCADE)
     company_name=models.CharField(max_length=100,blank=False,null=False)
@@ -77,9 +78,9 @@ class Job(models.Model):
     
 class SavedJob(models.Model):
     STATUS_CHOICES = [
-        ("I", "In Review"),
-        ("A", "Accepted"),
-        ("R", "Rejected")
+        ("In Review", "In Review"),
+        ("Accepted", "Accepted"),
+        ("Rejected", "Rejected")
     ]
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     job=models.ForeignKey(Job,on_delete=models.CASCADE)
