@@ -20,18 +20,12 @@ export default function JobDetails() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="text-center text-blue-500">Loading job details...</div>
-    );
-  }
-
   const { username, password } = useAuth();
 
   const { mutate: applyJob } = useMutation({
     mutationFn: async (data: unknown) => {
       const response = await axios.post(
-        `http://127.0.0.1:8000/save_job/`,
+        `http://127.0.0.1:8000/apply_job/${jobId}`,
         data,
         {
           headers: {
@@ -47,6 +41,12 @@ export default function JobDetails() {
     },
     onError: () => toast.error("Failed to apply for job."),
   });
+
+  if (isLoading) {
+    return (
+      <div className="text-center text-blue-500">Loading job details...</div>
+    );
+  }
 
   if (isError) {
     return (
@@ -94,11 +94,7 @@ export default function JobDetails() {
         </span>
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          onClick={() =>
-            applyJob({
-              id: jobId,
-            })
-          }
+          onClick={() => applyJob({})}
         >
           Apply Now
         </button>

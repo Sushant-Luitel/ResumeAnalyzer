@@ -21,6 +21,28 @@ export default function Home() {
     },
   });
 
+  const { username, password, fullName } = useAuth();
+
+  const [recommendationsData, setRecommendationsData] = useState([]);
+
+  const { mutate: recommendJob, isPending } = useMutation({
+    mutationFn: async () => {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/recommend/${username}/`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Basic " + btoa(`${username}:${password}`),
+          },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: (res) => setRecommendationsData(res.recommendations),
+    onError: () => toast.error("Failed to fetch job recommendations."),
+  });
+
   // Get the current date dynamically
   const [currentDate, setCurrentDate] = useState("");
 
@@ -44,15 +66,12 @@ export default function Home() {
           <div>
             <div className="text-sm text-gray-500">{currentDate}</div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Hi, John Doe! 👋
+              Hi,{fullName}👋
             </h1>
             <p className="text-gray-600 mt-1">
               Find your next opportunity from the latest job postings.
             </p>
           </div>
-          <button className="mt-4 md:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
-            Post a Job
-          </button>
         </div>
       </div>
 
