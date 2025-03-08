@@ -19,6 +19,7 @@ interface AuthContextType {
   registerUser: (newData: UserRegistration) => void;
   files: FileData[];
   setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
+  fullName: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +31,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
   const [password, setPassword] = useState<string>(
     localStorage.getItem("password") || ""
+  );
+
+  const [fullName, setFullName] = useState<string>(
+    localStorage.getItem("fullName") || ""
   );
   const [token, setToken] = useState<string>(
     localStorage.getItem("token") || ""
@@ -95,8 +100,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("token", res.token);
       setUsername(credentials.username);
       setPassword(credentials.password);
+      setFullName(res.fullName);
       localStorage.setItem("username", credentials.username);
       localStorage.setItem("password", credentials.password);
+      localStorage.setItem("fullName", res.fullName);
       navigate("/");
     },
     onError: () => {
@@ -107,6 +114,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logOut = () => {
     setToken("");
     localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("password");
+    localStorage.removeItem("fullName");
     navigate("/login");
   };
 
@@ -121,6 +131,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         registerUser,
         files,
         setFiles,
+        fullName,
       }}
     >
       {children}

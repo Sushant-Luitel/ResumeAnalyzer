@@ -166,6 +166,9 @@ def job(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method=="GET":
         jobs=Job.objects.all()
+        for job in jobs:
+            if job.is_expired(): 
+                job.delete()
         serializer = JobSerializer(jobs, many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     elif request.method=="DELETE":
