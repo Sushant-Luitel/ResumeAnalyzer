@@ -1,40 +1,30 @@
 import re
-
+global skills,education
 # List of skills and education keywords
 skills = [
-    'Python', 'Django', 'Machine Learning', 'JavaScript', 'React', 'SQL', 'Java', 'Node.js', 'HTML', 'CSS', 'Microsoft office'
-    'Flask', 'Keras', 'TensorFlow', 'Ruby', 'C++', 'PHP', 'PostgreSQL', 'AWS', 'Azure', 'Git', 'Docker', 'Angular',
-    'MySql','PostgressSql', 'frontend framework','backend framework','Django rest framework',
-    'DjangoRestFramework','ReactJs','ReactNative','React Native', 'git',
-    'Python', 'Java', 'JavaScript', 'SQL', 'NoSQL', 'HTML', 'CSS', 'React',
-    'Angular', 'Vue', 'Node.js', 'Django', 'Flask', 'Spring', 'Docker',
-    'Kubernetes', 'AWS', 'Azure', 'GCP', 'Git', 'REST API', 'GraphQL',
-    'Machine Learning', 'Data Analysis', 'Data Science', 'Tensorflow',
-    'PyTorch', 'NLP', 'Computer Vision', 'Agile', 'Scrum', 'DevOps',
-    'CI/CD', 'Testing', 'Automation', 'Leadership', 'Communication','Rust'
-    'React Native', 'Flutter', 'Swift', 'Kotlin', 'Jetpack Compose', 'Xamarin', 
-    'Cordova', 'Ionic', 'Unity',
-    'Ethical Hacking', 'Penetration Testing', 'Network Security', 'OWASP', 'SIEM', 
-    'Burp Suite', 'Metasploit', 'Snort', 'Nmap', 'Wireshark', 'SOC Analysis', 
-    'Threat Hunting', 'Incident Response', 'Zero Trust Security',
-    'Machine Learning', 'Deep Learning', 'Computer Vision', 'NLP', 'TensorFlow', 
-    'PyTorch', 'Keras', 'Scikit-learn', 'OpenCV', 'Hugging Face Transformers', 
-    'Speech Recognition', 'Reinforcement Learning', 'Generative AI', 'LLMs',
-    'Data Analysis', 'Data Visualization', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn', 
-    'Plotly', 'Dash', 'Power BI', 'Tableau', 'Google Data Studio', 'Excel', 
-    'Big Data', 'ETL', 'Airflow', 'Data Wrangling',
-    'Unit Testing', 'Integration Testing', 'Selenium', 'Cypress', 'JUnit', 'PyTest', 
-    'Mocha', 'Jest', 'Postman', 'Fuzzing', 'Test Automation', 'Load Testing',
+    'Python', 'Django', 'Machine Learning', 'JavaScript', 'React', 'SQL', 'Java', 
+    'Node.js', 'HTML', 'CSS', 'Microsoft office', 'Flask', 'Keras', 'TensorFlow', 
+    'Ruby', 'C++', 'PHP', 'PostgreSQL', 'AWS', 'Azure', 'Git', 'Docker', 'Angular',
+    'MySQL', 'PostgreSQL', 'Frontend Framework', 'Backend Framework', 'Django Rest Framework',
+    'ReactJS', 'React Native', 'Rust', 'NoSQL', 'Vue', 'Spring', 'GCP', 'REST API',
+    'GraphQL', 'Data Analysis', 'Data Science', 'PyTorch', 'NLP', 'Computer Vision',
+    'Agile', 'Scrum', 'DevOps', 'CI/CD', 'Testing', 'Automation', 'Leadership', 
+    'Communication', 'Flutter', 'Swift', 'Kotlin', 'Jetpack Compose', 'Xamarin', 
+    'Cordova', 'Ionic', 'Unity', 'Ethical Hacking', 'Penetration Testing', 'Network Security', 
+    'OWASP', 'SIEM', 'Burp Suite', 'Metasploit', 'Snort', 'Nmap', 'Wireshark', 'SOC Analysis', 
+    'Threat Hunting', 'Incident Response', 'Zero Trust Security', 'Scikit-learn', 'OpenCV', 
+    'Hugging Face Transformers', 'Speech Recognition', 'Reinforcement Learning', 'Generative AI', 
+    'LLMs', 'Data Visualization', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn', 'Plotly', 'Dash', 
+    'Power BI', 'Tableau', 'Google Data Studio', 'Excel', 'Big Data', 'ETL', 'Airflow', 
+    'Data Wrangling', 'Unit Testing', 'Integration Testing', 'Selenium', 'Cypress', 'JUnit', 
+    'PyTest', 'Mocha', 'Jest', 'Postman', 'Fuzzing', 'Test Automation', 'Load Testing',
     'Blockchain', 'Ethereum', 'Solidity', 'Hyperledger', 'Smart Contracts', 'IPFS', 
-    'DeFi', 'NFTs', 'Web3.js', 'Hardhat', 'Truffle',
+    'DeFi', 'NFTs', 'Web3.js', 'Hardhat', 'Truffle', 'IoT', 'Embedded Systems', 
+    'Arduino', 'Raspberry Pi', 'MQTT', 'Edge Computing', 'Unreal Engine', 'Godot', 
+    'Cocos2d', 'Game AI', 'Shader Programming', 'Project Management', 'Problem Solving', 
+    'Critical Thinking'
+]
 
-    'IoT', 'Embedded Systems', 'Arduino', 'Raspberry Pi', 'MQTT', 'Edge Computing',
-
-    'Unity', 'Unreal Engine', 'Godot', 'Cocos2d', 'Game AI', 'Shader Programming',
-
-    'Agile', 'Scrum', 'Project Management', 'Leadership', 'Communication', 
-    'Problem Solving', 'Critical Thinking'
-        ]
 
 education = [
     'MBA', 'Bsc.CSIT', 'BIM', 'Btech', 'Phd', 'Msc', 'Bsc', 'BBA', 'BBS', 'Bsc.IT', 'Bsc.CS', 'Bsc.CSIT',
