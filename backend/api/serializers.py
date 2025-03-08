@@ -3,19 +3,18 @@ from .models import CustomUser,FileUpload,Recruiter,Job
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields=['username','password','first_name','last_name',]
-        extra_kwargs= {'password':{'write_only':True}}
+        fields = ['username', 'password', 'first_name', 'last_name']
+        extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self,validated_data):
-        user=CustomUser(
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user( 
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
+            password=validated_data['password']  # No need to call set_password()
         )
-        user.set_password(validated_data['password'])
-        user.save()
-        CustomUser.objects.create_user(user)
         return user
+
 
 
 class FileSerializer(serializers.ModelSerializer):
