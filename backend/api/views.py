@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import check_password
 #imports from the serializer and model file
-from .serializers import CustomUserSerializer,FileSerializer,JobSerializer,RecruiterSerializer
+from .serializers import CustomUserSerializer,FileSerializer,JobSerializer,RecruiterSerializer,SavedJobSerializer
 from .models import CustomUser, FileUpload , SavedJob,Recruiter,Job
 #django
 from django.http import JsonResponse
@@ -532,53 +532,33 @@ def ats_score_computation(request):
     return Response({"error": "Invalid request method"}, status=400)
 
 @api_view(['POST'])
-def save_job(request):
-    if request.method == "POST":
-        try:
-            user = CustomUser.objects.get(username=request.user.username)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found"}, status=404)
-    else:
-        return Response({'error':"Only Post method is allowed"})
-    recruiter=request.data.get("recruiter")
-    company_name=request.data.get("company_name") #added more fields of the job
-    location=request.data.get("location")
-    job_title = request.data.get("job_title")
-    job_description = request.data.get("job_description")
-    job_requirements=request.data.get("job_requirements")
-    salary=request.data.get("salary")
-    job_type=request.data.get("posted_at")
-    expiry_time=request.data.get("expiry_time")
-    job_similarity = request.data.get("job_similarity", 0.0)  # Optional
+def apply_job(request, id):
+    if request.method != "POST":
+        return Response({'error': "Only POST method is allowed"}, status=405)  # Use 405 for "Method Not Allowed"
 
-    if not job_title or not job_description:
-        return Response(
-            {"error": "Job title and job description are required."},
-            status=400)
+    # Check if user exists
     try:
-        # Create a new SavedJob entry for the user.
-        save_job = SavedJob.objects.create(
-            user=user,
-            job_title=job_title,
-            company_name=company_name,
-            location=location,
-            job_description=job_description,
-            job_requirements=job_requirements, #added more fields of the job
-            job_type=job_type,
-            expiry_time=expiry_time,
-            salary=salary,
-            job_similarity=job_similarity
-        )
-        message = f"{user.first_name} has successfully saved the job: {job_title}"
-        return Response({"save_job":save_job})
-    except Exception as e:
+        user = CustomUser.objects.get(username=request.user.username)
+        print(user)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    # Check if job exists
+    job = Job.objects.filter(id=id).first()
+    if not job:
+        return Response({"error": "Job not found"}, status=404)
+    try:
+        # Save job application
+        save_job = SavedJob.objects.create(user=user, job=job)
         return Response(
-            {"error": "Could not save job", "details": str(e)},
-            status=500
+            {
+                "message": f"{user.first_name} has successfully saved the job: {job.job_title}",
+                "saved_job": {"id": save_job.id, "job_title": job.job_title, "user": user.username}
+            },
+            status=201
         )
+    except Exception as e:
+        return Response({"error": "Could not save job", "details": str(e)}, status=500)
 
-    print(message)
-    return Response({"message": message}, status=201)
 @api_view(['GET'])
 def applied_job(request):
     try:
@@ -605,3 +585,25 @@ def applied_job(request):
         "salary":salary,
         "location":location,
         })
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Ensure user is logged in
+def save_applied_job(request, job_id):
+    """Save a job after a user applies to it"""
+    user = request.user  # Get the logged-in user
+    job = get_object_or_404(Job, id=job_id)  # Get job or return 404
+
+    # Check if the job is already saved
+    if SavedJob.objects.filter(user=user, job=job).exists():
+        return Response({"message": "Job already saved"}, status=status.HTTP_200_OK)
+
+    # Save the job
+    saved_job = SavedJob.objects.create(user=user, job=job)
+    serializer = SavedJobSerializer(saved_job)  # Serialize the saved job
+
+    return Response(
+        {
+            "message": f"Job '{job.job_title}' saved successfully.",
+            "saved_job": serializer.data
+        },
+        status=status.HTTP_201_CREATED
+    )
