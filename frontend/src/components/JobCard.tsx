@@ -4,56 +4,47 @@ import { Badge } from "../components/ui/badge";
 export default function JobCard({ job }) {
   const navigate = useNavigate();
 
+  // Format expiry date
+  const formattedExpiryDate = new Date(job.expiry_time).toLocaleDateString(
+    "en-US",
+    { year: "numeric", month: "long", day: "numeric" }
+  );
+
   return (
     <div
-      className="bg-white rounded-lg border shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
+      className="bg-white rounded-lg border shadow-sm overflow-hidden cursor-pointer 
+      hover:shadow-lg transition transform hover:-translate-y-1 p-5"
       onClick={() => navigate(`/jobs/${job.id}`)}
     >
-      <div className="p-4">
-        <div className="flex justify-between">
-          <div className="flex gap-3">
-            {/* <div
-              className="h-10 w-10 rounded flex items-center justify-center text-white text-xs font-bold"
-              style={{ backgroundColor: job.company.color }}
-            >
-              {job.company.logo}
-            </div> */}
-            <div>
-              <h3 className="font-medium dark:text-white">{job.title}</h3>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {job.company_name} • {job.location}
-              </div>
-            </div>
+      {/* Job Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {job.job_title}
+          </h3>
+          <div className="text-sm text-gray-600">
+            {job.company_name} • {job.location}
           </div>
         </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge
-            variant="outline"
-            className="text-xs font-normal dark:border-gray-600"
-          >
-            {job.job_type}
-          </Badge>
-          {/* <Badge
-            variant="outline"
-            className="text-xs font-normal dark:border-gray-600"
-          >
-            {job.remote ? "Remote" : "On-site"}
-          </Badge> */}
-          <Badge
-            variant="outline"
-            className="text-xs font-normal dark:border-gray-600"
-          >
-            {job.experience}
-          </Badge>
+        {/* Salary Info */}
+        <div className="text-lg font-medium text-blue-600">
+          NPR {Number(job.salary).toLocaleString()}
         </div>
+      </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {job.expiry_time}
-          </div>
-          <div className="font-medium dark:text-white">{job.salary}</div>
-        </div>
+      {/* Job Details */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Badge className="bg-blue-100 text-blue-600 px-3 py-1 rounded-md text-xs">
+          {job.job_type === "FT" ? "Full-Time" : "Internship"}
+        </Badge>
+        <Badge className="bg-green-100 text-green-600 px-3 py-1 rounded-md text-xs">
+          {job.experience || "Experience Required"}
+        </Badge>
+      </div>
+
+      {/* Expiry Date */}
+      <div className="mt-4 text-xs text-gray-500">
+        Expires on: {formattedExpiryDate}
       </div>
     </div>
   );

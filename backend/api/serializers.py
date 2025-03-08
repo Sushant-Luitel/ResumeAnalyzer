@@ -52,7 +52,7 @@ class RecruiterSerializer(serializers.ModelSerializer):
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model=Job
-        fields=['recruiter','company_name','location','job_title','salary','job_type','job_description','job_requirements','expiry_time']
+        fields=['id','recruiter','company_name','location','job_title','salary','job_type','job_description','job_requirements','expiry_time']
     def create(self, validated_data):
         recruiter = self.context['request'].user 
         print(recruiter.username)
