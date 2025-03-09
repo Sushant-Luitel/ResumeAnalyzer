@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +45,91 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
 ]
+JAZZMIN_SETTINGS = {
+    "site_title": "Job Portal Admin",
+    "site_header": "Job Portal",
+    "theme": "sketchy",
+    "site_brand": "Job Portal",
+    "site_logo": None,
+    "login_logo": None,
+    "login_logo_dark": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Welcome to the Job Portal",
+    
+    "search_model": [],
+    "user_avatar": None,
+    "show_ui_builder": False,  # Hide UI Builder (Jazzmin version)
+    "copyright": None,  # Remove copyright text
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    
+    "hide_apps": ["authtoken", "auth"],
+    "hide_models": ["auth.group"],
+    "topmenu_links": [],
+    "usermenu_links": [],
+
+    "custom_links": {
+        "jobs": [{
+            "name": "Post Job", 
+            "url": "post_job", 
+            "icon": "fas fa-briefcase",
+            "permissions": ["jobs.view_job"]
+        }]
+    },
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "jobs": "fas fa-briefcase",
+        "jobs.job": "fas fa-tasks",
+        "jobs.company": "fas fa-building"
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": False,
+    "custom_css": "admin/custom.css",  # Custom CSS to hide Jazzmin version
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-light-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
+JAZZMIN_SETTINGS["show_ui_builder"] = True
 REST_FRAMEWORK = {
     # Set the default permission classes (ensure only one definition)
      'DEFAULT_PERMISSION_CLASSES': [

@@ -30,7 +30,7 @@ from nltk.corpus import stopwords as StopWords
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 from .extract_skills import extract_skills,extract_education,skills,education
-print(skills)
+
 @api_view(['GET','POST'])
 def home(request):
     return Response("hpa", status=status.HTTP_200_OK)
@@ -351,7 +351,7 @@ def process_pdf(file_path, max_pages=3):
 @api_view(["GET", "POST"])
 def recommend_jobs(request, username):
 
-    print(skills)
+
 
     """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
     try:
@@ -377,6 +377,7 @@ def recommend_jobs(request, username):
         # Extract skills and education from resume
         user_skill = extract_skills(text, skills)
         user_education = extract_education(text, education)
+        user_job_title=Job.objects.get(id=request.user.job.id)
         user_qualification = f"{user_skill} {user_education}".strip()
         print(user_qualification+ "qualifications")
 
@@ -597,3 +598,30 @@ def save_applied_job(request, job_id):
         },
         status=status.HTTP_201_CREATED
     )
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])  # Ensures only logged-in users can access this
+def recommend_save_job(request):
+    user = request.user  # Django handles authentication; no need to fetch manually
+
+    if request.method == 'POST':
+        required_fields = ['job_title', 'job_description', 'company_name', 'work_type', 'job_requirements', 'salary', 'location']
+        if not all(field in request.data for field in required_fields):
+            return Response({"error": "All fields are required"}, status=400)
+
+        save_job = SavedJob.objects.create(
+            user=user,  # Assuming there's a ForeignKey to CustomUser
+            job_title=request.data['job_title'],
+            job_description=request.data['job_description'],
+            company_name=request.data['company_name'],
+            job_type=request.data['work_type'],
+            job_requirements=request.data['job_requirements'],
+            salary=request.data['salary'],
+            location=request.data['location'],
+        )
+        return Response({"message": "Job saved successfully"}, status=201)
+
+    elif request.method == 'GET':
+        saved_jobs = SavedJob.objects.filter(user=user).values(
+            "id", "job_title", "job_description", "company_name", "job_type", "job_requirements", "salary", "location"
+        )
+        return Response({"saved_jobs": list(saved_jobs)}, status=200)

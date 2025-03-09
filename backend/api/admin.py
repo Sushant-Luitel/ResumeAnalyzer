@@ -2,17 +2,18 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser,FileUpload,SavedJob,Recruiter,Job
 # Register your models here.
-class CustomUserAdmin(UserAdmin):
-    model = CustomUser
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined')
-    list_filter = ('is_staff', 'is_active')
-    search_fields = ('username', 'email')
-    ordering = ('date_joined',)
+# class CustomUserAdmin(UserAdmin):
+#     model = CustomUser
+#     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined')
+#     list_filter = ('is_staff', 'is_active')
+#     search_fields = ('username', 'email')
+#     ordering = ('date_joined',)
 
-admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(FileUpload)
+# admin.site.register(CustomUser, CustomUserAdmin)
+# admin.site.register(FileUpload)
 @admin.register(SavedJob)
 class SavedJobAdmin(admin.ModelAdmin):
+    # verbose_name="Job Application"
     list_display = ('user', 'job', 'status')
     list_filter = ('status',)
     list_editable = ('status',)
@@ -31,8 +32,8 @@ class JobAdmin(admin.ModelAdmin):
     get_recruiter_name.short_description = 'Recruiter Name'
 
 # Recruiter Admin
-@admin.register(Recruiter)
-class RecruiterAdmin(admin.ModelAdmin):
-    model = Recruiter
-    list_display = ('username', 'email', )
-    search_fields = ('username', 'email', )
+# @admin.register(Recruiter)
+# class RecruiterAdmin(admin.ModelAdmin):
+#     model = Recruiter
+#     list_display = ('username', 'email', )
+#     search_fields = ('username', 'email', )

@@ -16,7 +16,7 @@ except UnicodeDecodeError:
 if column_name in df.columns:
     # Extract the skills column and drop NaN values
     skills = df[column_name].dropna().tolist()
-    print(skills)
+
 else:
     print(f"Error: Column '{column_name}' not found in the CSV file.")
 

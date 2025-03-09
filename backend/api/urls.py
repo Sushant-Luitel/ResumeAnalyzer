@@ -15,5 +15,6 @@ urlpatterns = [
     path('recruiter_logout/',views.recruiter_logout,name='recruiterLogout'),
     path('recruiter_register/',views.recruiter_register,name='recruiterRegister'),
     path('job/',views.job,name='job'),
-    path('job/<int:id>/',views.get_job,name="getjob")
+    path('job/<int:id>/',views.get_job,name="getjob"),
+    path('applyfeaturedjob/',views.recommend_save_job,name="applyfeaturejob"),
 ]
