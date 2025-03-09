@@ -84,6 +84,10 @@ class SavedJob(models.Model):
     ]
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     job=models.ForeignKey(Job,on_delete=models.CASCADE)
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='In Review')
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='IN Review')
     def __str__(self):
-        return f"{self.user } has applied to {self.job_title}"
+        return f"{self.user } has applied to {self.job.job_title}"
+    
+    class Meta:
+        verbose_name = "Job Application"
+    
