@@ -37,9 +37,6 @@ export default function JobCard({ job }) {
         <Badge className="bg-blue-100 text-blue-600 px-3 py-1 rounded-md text-xs">
           {job.job_type === "FT" ? "Full-Time" : "Internship"}
         </Badge>
-        <Badge className="bg-green-100 text-green-600 px-3 py-1 rounded-md text-xs">
-          {job.experience || "Experience Required"}
-        </Badge>
       </div>
 
       {/* Expiry Date */}

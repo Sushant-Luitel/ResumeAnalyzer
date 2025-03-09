@@ -20,7 +20,7 @@ export default function JobDetails() {
     },
   });
 
-  const { username, password } = useAuth();
+  const { username, password, files } = useAuth();
 
   const { mutate: applyJob } = useMutation({
     mutationFn: async (data: unknown) => {
@@ -94,7 +94,14 @@ export default function JobDetails() {
         </span>
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          onClick={() => applyJob({})}
+          onClick={() => {
+            if (files.length === 0) {
+              toast.error("Please Upload Your Resume First");
+              return;
+            } else {
+              applyJob({});
+            }
+          }}
         >
           Apply Now
         </button>

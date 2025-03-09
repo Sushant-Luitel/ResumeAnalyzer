@@ -2,7 +2,7 @@ import re
 import pandas as pd
 
 # Use a raw string (r'...') to avoid issues with backslashes
-file_path = r'C:\Users\srija\Desktop\New folder\ResumeAnalyzer\ResumeAnalyzer\backend\static\skills.csv'
+file_path = r'D:/ResumeAnalyzer/backend/static/skills.csv'
 column_name = "skills"  # Ensure this matches the actual column name in your CSV
 
 try:
