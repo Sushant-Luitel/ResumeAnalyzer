@@ -2,7 +2,7 @@ import re
 import pandas as pd
 
 # Use a raw string (r'...') to avoid issues with backslashes
-file_path = r'C:\Users\srija\Desktop\New folder\ResumeAnalyzer\ResumeAnalyzer\backend\static\skills.csv'
+file_path = r'/home/karun/riki/dev/ResumeAnalyzer/backend/static/skills.csv'
 column_name = "skills"  # Ensure this matches the actual column name in your CSV
 
 try:
@@ -16,7 +16,7 @@ except UnicodeDecodeError:
 if column_name in df.columns:
     # Extract the skills column and drop NaN values
     skills = df[column_name].dropna().tolist()
-    print(skills)
+
 else:
     print(f"Error: Column '{column_name}' not found in the CSV file.")
 
