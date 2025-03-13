@@ -42,7 +42,7 @@ export default function AppliedJobsPage() {
               </h2>
               <p className="text-gray-700 font-medium">{job.job_company}</p>
               <p className="text-gray-600">{job.location}</p>
-              <p className="text-teal-800 font-semibold">{`Salary: $${job.salary}`}</p>
+              <p className="text-lg font-medium text-blue-600">{`Salary: NPR ${job.salary}`}</p>
 
               <div className="mt-2">
                 <p className="text-gray-600 font-semibold">Job Requirements:</p>
