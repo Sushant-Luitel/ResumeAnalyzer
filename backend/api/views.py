@@ -351,13 +351,13 @@ def process_pdf(file_path, max_pages=3):
 @api_view(["GET", "POST"])
 def recommend_jobs(request, username):
 
-
-
+    print(username)
     """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
     try:
         if not username:
+            
             return Response({"error": "Username is required"}, status=400)
-
+        print(username)
         # Retrieve user and uploaded resume
         user = CustomUser.objects.filter(username=username).first()
         print(user)
@@ -377,7 +377,7 @@ def recommend_jobs(request, username):
         # Extract skills and education from resume
         user_skill = extract_skills(text, skills)
         user_education = extract_education(text, education)
-        user_job_title=Job.objects.get(id=request.user.job.id)
+        # user_job_title=Job.objects.get(id=request.user.job.id)
         user_qualification = f"{user_skill} {user_education}".strip()
         print(user_qualification+ "qualifications")
 
@@ -550,32 +550,30 @@ def apply_job(request, id):
     except Exception as e:
         return Response({"error": "Could not save job", "details": str(e)}, status=500)
 
-@api_view(['GET'])
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])  # Ensures only authenticated users can access this view
 def applied_job(request):
-    try:
-        user = CustomUser.objects.get(username=request.user.username)
-    except CustomUser.DoesNotExist:
-        return Response({"error": "User not found"}, status=404)
-    save_job = SavedJob.objects.filter(user=user) 
-    print(save_job)
-    if not save_job:
-        return Response({"message": f"{user.username} has no saved jobs"})
-    job_descriptions=[job.job_description for job in save_job]
-    company_name=[job.job_company for job in save_job]
-    location=[job.location for job in save_job]
-    job_title=[job.job_title for job in save_job]
-    salary=[job.salary for job in save_job]
-    job_requirements=[job.job_requirements for job in save_job]
-    posted_at=[job.posted_at for job in save_job]
-    
-    return Response({"username": user.username,
-        "job_title": job_title,
-        "job_company":company_name,
-        "job_description":job_descriptions,
-        "job_requirements":job_requirements,
-        "salary":salary,
-        "location":location,
-        })
+    user = request.user 
+
+    applied_jobs = SavedJob.objects.filter(user=user).select_related("job")
+
+    if not applied_jobs.exists():
+        return Response({"message": f"{user.username} has no applied jobs"}, status=200)
+
+    jobs_data = [
+        {
+            "job_title": job.job.job_title,
+            "job_company": job.job.company_name,
+            "location": job.job.location,
+            "salary": job.job.salary,
+            "job_requirements": job.job.job_requirements,
+            "status": job.status,
+            "posted_at": job.job.posted_at,
+        }
+        for job in applied_jobs
+    ]
+
+    return Response({"username": user.username, "applied_jobs": jobs_data})  # Fixed closing parenthesis
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  # Ensure user is logged in
 def save_applied_job(request, job_id):

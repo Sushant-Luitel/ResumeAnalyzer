@@ -9,7 +9,7 @@ urlpatterns = [
     path('recommend/<str:username>/',views.recommend_jobs,name='recommend'),
     path('ats/',views.ats_score_computation,name='ats'),
     path('apply_job/<int:id>',views.apply_job,name='apply'),
-    path('applied_jobs/<int:id>/',views.applied_job,name='applied'),
+    path('applied_jobs/',views.applied_job,name='applied'),
     #for recruiter
     path('recruiter_login/',views.recruiter_login,name='recruiterLogin'),
     path('recruiter_logout/',views.recruiter_logout,name='recruiterLogout'),
@@ -17,4 +17,6 @@ urlpatterns = [
     path('job/',views.job,name='job'),
     path('job/<int:id>/',views.get_job,name="getjob"),
     path('applyfeaturedjob/',views.recommend_save_job,name="applyfeaturejob"),
+    path('status/',views.recruiter_update_status,name='status'),
+    
 ]
