@@ -554,7 +554,6 @@ def applied_job(request):
     return Response({"username": user.username, "applied_jobs": jobs_data})  # Fixed closing parenthesis
 
 from django.utils import timezone
-from decimal import Decimal
 @api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def recommend_save_job(request):
@@ -573,7 +572,7 @@ def recommend_save_job(request):
             company_name=request.data['company_name'],
             location=request.data['location'],
             job_title=request.data['job_title'],
-          salary = Decimal(request.data['salary']),
+          salary = request.data['salary'],
             job_type=request.data['work_type'],
             job_description=request.data['job_description'],
             job_requirements=request.data['job_requirements'],
