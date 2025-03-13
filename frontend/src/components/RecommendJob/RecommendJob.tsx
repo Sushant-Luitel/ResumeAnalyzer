@@ -1,22 +1,36 @@
 import { toast } from "react-toastify";
 import Button from "../../design/Button";
-import ResumeUpload from "../ResumeUpload/ResumeUpload";
 import { useAuth } from "../../context/authContext";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Loader from "../reusable/Loader";
+import { Link } from "react-router-dom";
 
 const RecommendJob = () => {
   const { files, username, password } = useAuth();
-  const [recommendationsData, setRecommendationsData] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
+  interface Job {
+    "Job Id": string;
+    "Job Title": string;
+    Company: string;
+    location: string;
+    "Salary Range": string;
+    "Job Description": string;
+    "Work Type": string;
+    Experience: string;
+    Similarity: number;
+  }
 
-  const { mutate: recommendJob, isPending } = useMutation({
-    mutationFn: async () => {
-      const response = await axios.post(
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const {
+    data: recommendationsData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["jobRecommendations"],
+    queryFn: async () => {
+      const response = await axios.get(
         `http://127.0.0.1:8000/recommend/${username}/`,
-        {},
         {
           headers: {
             "Content-Type": "application/json",
@@ -24,20 +38,18 @@ const RecommendJob = () => {
           },
         }
       );
-      return response.data;
+      return response.data.recommendations;
     },
-    onSuccess: (res) => setRecommendationsData(res.recommendations),
-    onError: () => toast.error("Failed to fetch job recommendations."),
+    enabled: files.length === 1,
+    refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (files.length < 1) setRecommendationsData([]);
-  }, [files]);
+  console.log(files.length === 1);
 
   const { mutate: applyJob } = useMutation({
     mutationFn: async (data: unknown) => {
       const response = await axios.post(
-        `http://127.0.0.1:8000/save_job/`,
+        `http://127.0.0.1:8000/applyfeaturedjob/`,
         data,
         {
           headers: {
@@ -50,55 +62,48 @@ const RecommendJob = () => {
     },
     onSuccess: () => {
       setSelectedJob(null);
-      toast.success("Applied Successfully");
+      toast.success("Application sent successfully! Best of luck.");
     },
-    onError: () => toast.error("Failed to apply for job."),
+    onError: () =>
+      toast.error("Oops! Something went wrong while applying for the job."),
   });
 
-  const otherJobs = recommendationsData.filter(
+  const otherJobs = recommendationsData?.filter(
     (job) => job["Similarity"] <= 0.3 && job["Similarity"] > 0
   );
-  if (isPending) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col items-center gap-8 p-6 bg-teal-50 min-h-screen">
-      <ResumeUpload />
-      <Button
-        className="bg-teal-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-teal-700 transition"
-        onClick={() =>
-          files.length > 0
-            ? recommendJob()
-            : toast.error("Please Upload Your Resume")
-        }
-      >
-        Recommend Job
-      </Button>
-
-      <div className="p-6 w-full max-w-5xl">
-        <h1 className="text-3xl font-bold text-teal-800 mb-4">
-          Recommended Jobs
+    <div className="flex flex-col items-center gap-8 p-8 bg-gray-50 min-h-screen">
+      <div className="p-8 w-full max-w-5xl bg-white rounded-lg shadow-xl">
+        <h1 className="text-4xl font-bold text-teal-800 mb-6">
+          Discover Jobs Tailored Just for You!
         </h1>
-        {recommendationsData.length < 1 && (
+        {files?.length < 1 && (
           <p className="text-gray-600">
-            No Recommendations. Upload Your Resume And Get Personalized
-            Recommendations
+            Get personalized job suggestions by uploading your resume. Ensure
+            your{" "}
+            <Link to="/profile" className="text-teal-300">
+              Profile
+            </Link>{" "}
+            is complete to receive the best recommendations!
           </p>
         )}
-        {recommendationsData.length == 1 &&
-          recommendationsData[0] == "Empty" && (
+        {recommendationsData?.length == 0 &&
+          recommendationsData[0] === "Empty" && (
             <p className="text-gray-600">
-              No job recommendations found. Please ensure your uploaded file is
-              a valid resume with relevant details.
+              We couldn't find any recommendations. Please make sure your resume
+              is well-detailed and contains the necessary information.
             </p>
           )}
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {recommendationsData.map((job) => {
+          {recommendationsData?.map((job) => {
             if (job["Similarity"] > 0.3)
               return (
                 <button
                   key={job["Job Id"]}
                   onClick={() => setSelectedJob(job)}
-                  className="p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition border border-teal-300 cursor-pointer"
+                  className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition border border-teal-300 cursor-pointer transform hover:scale-105"
                 >
                   <h2 className="text-xl font-semibold text-teal-700">
                     {job["Job Title"]}
@@ -112,18 +117,18 @@ const RecommendJob = () => {
               );
           })}
         </div>
-        {otherJobs.length > 0 && (
+        {otherJobs?.length > 0 && (
           <>
-            <h1 className="text-3xl font-bold text-teal-800  my-10">
-              You Might Also Consider Applying :
-            </h1>
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 my-4 ">
-              {otherJobs.map((job: any) => {
+            <h2 className="text-3xl font-bold text-teal-800 mt-10 mb-6">
+              You Might Also Like:
+            </h2>
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {otherJobs?.map((job: any) => {
                 return (
                   <button
                     key={job["Job Id"]}
                     onClick={() => setSelectedJob(job)}
-                    className="p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition border border-teal-300 cursor-pointer"
+                    className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition border border-teal-300 cursor-pointer transform hover:scale-105"
                   >
                     <h2 className="text-xl font-semibold text-teal-700">
                       {job["Job Title"]}
@@ -142,7 +147,7 @@ const RecommendJob = () => {
       </div>
 
       {selectedJob && (
-        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-black/20 z-50 ">
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-black/20 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative">
             <button
               onClick={() => setSelectedJob(null)}
@@ -163,14 +168,19 @@ const RecommendJob = () => {
             <p className="text-gray-700 mt-2">
               {selectedJob["Job Description"]}
             </p>
-
             <Button
-              className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md w-full hover:bg-teal-700 transition cursor-pointer"
+              className="mt-4 bg-teal-600 text-white px-6 py-3 rounded-md w-full hover:bg-teal-700 transition cursor-pointer"
               onClick={() =>
                 applyJob({
                   job_title: selectedJob["Job Title"],
                   job_description: selectedJob["Job Description"],
-                  job_company: selectedJob["Company"],
+                  company_name: selectedJob["Company"],
+                  work_type: selectedJob["Work Type"],
+                  job_requirements: selectedJob["Experience"],
+                  location: selectedJob["location"],
+                  salary:
+                    Number(selectedJob["Salary Range"].match(/\d+/g)?.[0]) *
+                    1000,
                 })
               }
             >

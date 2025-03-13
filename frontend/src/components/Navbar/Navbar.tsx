@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, BrainCircuit } from "lucide-react";
-import { useAuth } from "../../context/authContext";
-import Modal from "../reusable/Modal";
 
 const Navbar = () => {
-  const { logOut } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -35,14 +32,7 @@ const Navbar = () => {
                 <a href="https://www.overleaf.com/">Build Resume</a>
               </li>
             </ul>
-            <div className=" hidden lg:flex justify-center items-center">
-              <button
-                className="border border-black bg-gradient-to-r from-teal-800 to-teal-600 px-4 py-2 rounded text-white cursor-pointer"
-                onClick={() => setIsOpen(true)}
-              >
-                Log Out
-              </button>
-            </div>
+            <div className=" hidden lg:flex justify-center items-center"></div>
             <div className="lg:hidden md:flex flex-col justify-end">
               <button onClick={toggleNavbar}>
                 {mobileDrawerOpen ? <X /> : <Menu />}
@@ -65,40 +55,10 @@ const Navbar = () => {
                   <a href="https://www.overleaf.com/">Build Resume</a>
                 </li>
               </ul>
-              <div className=" flex space-x-6">
-                <button
-                  className="border border-black bg-gradient-to-r from-teal-800 to-teal-600 px-4 py-2 rounded text-white"
-                  onClick={() => logOut()}
-                >
-                  Log Out
-                </button>
-              </div>
             </div>
           )}
         </div>
       </nav>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <div className="bg-white p-6 rounded-lg  w-80 text-center">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Are you sure you want to logout?
-          </h2>
-
-          <div className="mt-4 flex justify-center gap-4">
-            <button
-              onClick={logOut}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition cursor-pointer"
-            >
-              Yes
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition cursor-pointer"
-            >
-              No
-            </button>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };
