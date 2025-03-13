@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('home/',views.home,name="home"),
     path('register/',views.register_user,name="register"),
@@ -19,4 +21,4 @@ urlpatterns = [
     path('applyfeaturedjob/',views.recommend_save_job,name="applyfeaturejob"),
     path('status/',views.recruiter_update_status,name='status'),
     
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
