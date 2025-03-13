@@ -8,6 +8,7 @@ import RecommendJob from "./components/RecommendJob/RecommendJob";
 import CalculateATS from "./components/CalculateATS/CalculateATS";
 import AppliedJobsPage from "./components/AppliedJobs/AppliedJobs";
 import JobDetails from "./components/JobDetails/JobDetails";
+import LandingPage from "./pages/LandingPage";
 
 export const Layout = () => {
   return (
@@ -15,11 +16,17 @@ export const Layout = () => {
       {/* Routes without MainLayout (Login and Register) */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+        <Route
+            path="/"
+            element={
+                <LandingPage/>
+            }
+          />
 
       {/* Routes with MainLayout (Protected routes) */}
       <Route element={<MainLayout />}>
         <Route
-          path="/"
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />

@@ -76,14 +76,14 @@ const RecommendJob = () => {
   return (
     <div className="flex flex-col items-center gap-8 p-8 bg-gray-50 min-h-screen">
       <div className="p-8 w-full max-w-5xl bg-white rounded-lg shadow-xl">
-        <h1 className="text-4xl font-bold text-teal-800 mb-6">
+        <h1 className="text-4xl font-bold text-gray-800 mb-6">
           Discover Jobs Tailored Just for You!
         </h1>
         {files?.length < 1 && (
           <p className="text-gray-600">
             Get personalized job suggestions by uploading your resume. Ensure
             your{" "}
-            <Link to="/profile" className="text-teal-300">
+            <Link to="/profile" className="text-gray-300">
               Profile
             </Link>{" "}
             is complete to receive the best recommendations!
@@ -103,15 +103,15 @@ const RecommendJob = () => {
                 <button
                   key={job["Job Id"]}
                   onClick={() => setSelectedJob(job)}
-                  className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition border border-teal-300 cursor-pointer transform hover:scale-105"
+                  className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition border border-gray-300 cursor-pointer transform hover:scale-105"
                 >
-                  <h2 className="text-xl font-semibold text-teal-700">
+                  <h2 className="text-xl font-semibold text-gray-700">
                     {job["Job Title"]}
                   </h2>
                   <p className="text-gray-700">{job["Company"]}</p>
                   <p className="text-gray-600">{job["location"]}</p>
-                  <p className="text-lg font-medium text-blue-600">
-                    NPR {Number(job["Salary Range"].match(/\d+/g)?.[0]) * 1000}
+                  <p className="text-gray-800 font-semibold">
+                    {job["Salary Range"]}
                   </p>
                 </button>
               );
@@ -119,7 +119,7 @@ const RecommendJob = () => {
         </div>
         {otherJobs?.length > 0 && (
           <>
-            <h2 className="text-3xl font-bold text-teal-800 mt-10 mb-6">
+            <h2 className="text-3xl font-bold text-gray-800 mt-10 mb-6">
               You Might Also Like:
             </h2>
             <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -128,16 +128,15 @@ const RecommendJob = () => {
                   <button
                     key={job["Job Id"]}
                     onClick={() => setSelectedJob(job)}
-                    className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition border border-teal-300 cursor-pointer transform hover:scale-105"
+                    className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition border border-gray-300 cursor-pointer transform hover:scale-105"
                   >
-                    <h2 className="text-xl font-semibold text-teal-700">
+                    <h2 className="text-xl font-semibold text-gray-700">
                       {job["Job Title"]}
                     </h2>
                     <p className="text-gray-700">{job["Company"]}</p>
                     <p className="text-gray-600">{job["location"]}</p>
-                    <p className="text-lg font-medium text-blue-600">
-                      NPR{" "}
-                      {Number(job["Salary Range"].match(/\d+/g)?.[0]) * 1000}
+                    <p className="text-gray-800 font-semibold">
+                      {job["Salary Range"]}
                     </p>
                   </button>
                 );
@@ -156,21 +155,21 @@ const RecommendJob = () => {
             >
               ✖
             </button>
-            <h2 className="text-2xl font-bold text-teal-800 mb-2">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
               {selectedJob["Job Title"]}
             </h2>
             <p className="text-gray-700 font-semibold">
               {selectedJob["Company"]}
             </p>
             <p className="text-gray-600">{selectedJob["location"]}</p>
-            <p className="text-teal-800 font-semibold">
+            <p className="text-gray-800 font-semibold">
               {selectedJob["Salary Range"]}
             </p>
             <p className="text-gray-700 mt-2">
               {selectedJob["Job Description"]}
             </p>
             <Button
-              className="mt-4 bg-teal-600 text-white px-6 py-3 rounded-md w-full hover:bg-teal-700 transition cursor-pointer"
+              className="mt-4 bg-gray-600 text-white px-6 py-3 rounded-md w-full hover:bg-gray-700 transition cursor-pointer"
               onClick={() =>
                 applyJob({
                   job_title: selectedJob["Job Title"],
