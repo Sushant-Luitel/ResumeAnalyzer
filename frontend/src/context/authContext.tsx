@@ -104,7 +104,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("username", credentials.username);
       localStorage.setItem("password", credentials.password);
       localStorage.setItem("fullName", res.fullName);
-      navigate("/");
+      navigate("/home");
     },
     onError: () => {
       loginError();
@@ -117,7 +117,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("username");
     localStorage.removeItem("password");
     localStorage.removeItem("fullName");
-    navigate("/login");
+    navigate("/");
   };
 
   return (

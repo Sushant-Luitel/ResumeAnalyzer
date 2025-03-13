@@ -4,10 +4,10 @@ import Modal from "../reusable/Modal";
 import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router";
 const menuItems = [
-  { name: "Dashboard", path: "/" },
+  { name: "Dashboard", path: "/home" },
   { name: "Personalized Jobs", path: "/personalized-jobs" },
-  { name: "My Applications", path: "/applications" },
-  { name: "Profile", path: "/profile" },
+  { name: "Applied Jobs", path: "/applications" },
+  { name: "Upload Resume", path: "/profile" },
 ];
 
 export default function Sidebar() {
@@ -21,7 +21,7 @@ export default function Sidebar() {
     <div className="flex">
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-[#342a7c] text-white w-64 p-4 transition-transform ${
+        className={`fixed top-0 left-0 h-full bg-gray-400 text-black w-64 p-4 transition-transform ${
           isOpen ? "translate-x-0" : "-translate-x-64"
         } md:translate-x-0`}
       >
@@ -43,8 +43,8 @@ export default function Sidebar() {
               className={`p-2 rounded-md transition cursor-pointer 
             ${
               activeIndex === index
-                ? "bg-white text-[#342a7c]"
-                : "hover:bg-white hover:text-[#342a7c]"
+                ? "bg-white text-black"
+                : "hover:bg-black hover:text-white"
             }`}
             >
               {item.name}
@@ -52,9 +52,9 @@ export default function Sidebar() {
           ))}
 
           {/* Log Out Button */}
-          <li className=" hover:text-[#342a7c] p-2 rounded-md transition cursor-pointer">
+          <li className=" hover:text-[#342a7c] p-2 rounded-md transition cursor-pointer mt-96">
             <button
-              className=" bg-teal-600 px-4 py-2 rounded text-white cursor-pointer"
+              className=" bg-white px-4 py-2 rounded text-black cursor-pointer"
               onClick={() => setIsLogoutOpen(true)}
             >
               Log Out
@@ -72,7 +72,7 @@ export default function Sidebar() {
           <div className="mt-4 flex justify-center gap-4">
             <button
               onClick={logOut}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition cursor-pointer"
+              className="bg-red-600 text-black px-4 py-2 rounded-lg hover:bg-red-700 transition cursor-pointer"
             >
               Yes
             </button>
@@ -87,7 +87,7 @@ export default function Sidebar() {
       </Modal>
       {/* Mobile Menu Button */}
       <button
-        className="md:hidden fixed top-4 left-4 bg-[#342a7c] text-white p-2 rounded"
+        className="md:hidden fixed top-4 left-4 bg-[#342a7c] text-black p-2 rounded"
         onClick={() => setIsOpen(true)}
       >
         <Menu size={24} />
