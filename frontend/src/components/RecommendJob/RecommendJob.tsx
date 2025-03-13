@@ -110,8 +110,8 @@ const RecommendJob = () => {
                   </h2>
                   <p className="text-gray-700">{job["Company"]}</p>
                   <p className="text-gray-600">{job["location"]}</p>
-                  <p className="text-teal-800 font-semibold">
-                    {job["Salary Range"]}
+                  <p className="text-lg font-medium text-blue-600">
+                    NPR {Number(job["Salary Range"].match(/\d+/g)?.[0]) * 1000}
                   </p>
                 </button>
               );
@@ -135,8 +135,9 @@ const RecommendJob = () => {
                     </h2>
                     <p className="text-gray-700">{job["Company"]}</p>
                     <p className="text-gray-600">{job["location"]}</p>
-                    <p className="text-teal-800 font-semibold">
-                      {job["Salary Range"]}
+                    <p className="text-lg font-medium text-blue-600">
+                      NPR{" "}
+                      {Number(job["Salary Range"].match(/\d+/g)?.[0]) * 1000}
                     </p>
                   </button>
                 );
