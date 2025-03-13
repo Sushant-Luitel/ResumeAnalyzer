@@ -41,8 +41,6 @@ def register_user(request):
     if request.method == "POST":
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
-            # print(serializer.data)
-            print(request.data)
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
@@ -65,14 +63,12 @@ def login(request):
         fullName=f"{user.first_name}  {user.last_name}"
         # If user is authenticated, create or get the token
         token, created = Token.objects.get_or_create(user=user)
-        print(token.key)
         return Response({"token": token.key,'csrfToken': csrf_token,'username':user.username,'fullName':fullName,'password':user.password}, status=status.HTTP_200_OK)
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
     try :
-        print(request.user)
         token=Token.objects.get(user=request.user)
         if token:
             token.delete()
@@ -82,7 +78,6 @@ def logout(request):
 
 @api_view(['GET', 'POST'])
 def file_upload(request):
-    print(request.user)
     try:
         if 'file' not in request.FILES:
             return Response({'error': 'No file was submitted.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -94,7 +89,6 @@ def file_upload(request):
             serializer.save()
             # Get the token for the user
             token = Token.objects.get(user=request.user).key
-            print(token)
             return Response({'message': 'File uploaded successfully!'}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -113,7 +107,6 @@ def recruiter_register(request):
             return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
         serializer = RecruiterSerializer(data=request.data)
         if serializer.is_valid():
-            print(request.data)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -126,13 +119,11 @@ def recruiter_login(request):
     if request.method == "POST":
         username = request.data.get('username')
         password = request.data.get('password')
-        print(username,password)
         if not username or not password:
             return Response({"error": "Username and Password are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             recruiter = Recruiter.objects.get(username=username)
-            print(recruiter.username)
         except Recruiter.DoesNotExist:
             return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -150,10 +141,8 @@ def recruiter_login(request):
 @permission_classes([IsAuthenticated])   
 @api_view(['GET','POST','DELETE','PUT'])
 def job(request):
-    print(f"{request.user} *****" )
     if request.method == "POST":
         try:
-            print(request.user.username)
             recruiter = Recruiter.objects.get(username=request.user.username)
         except Recruiter.DoesNotExist:
             return Response({"error": "Recruiter not found"}, status=404)
@@ -202,7 +191,6 @@ def get_job(request, id):
 @api_view(['GET'])
 def recruiter_logout(request):
     try:
-        print(request.username)
         token=Token.objects.get(user=request.user)
         if token:
             token.delete()
@@ -351,16 +339,13 @@ def process_pdf(file_path, max_pages=3):
 @api_view(["GET", "POST"])
 def recommend_jobs(request, username):
 
-    print(username)
     """Recommend jobs based on resume content using TF-IDF and cosine similarity."""
     try:
         if not username:
             
             return Response({"error": "Username is required"}, status=400)
-        print(username)
         # Retrieve user and uploaded resume
         user = CustomUser.objects.filter(username=username).first()
-        print(user)
         if not user:
             return Response({"error": "User not found"}, status=404)
 
@@ -370,7 +355,6 @@ def recommend_jobs(request, username):
 
         # Extract resume content
         text = process_pdf(file.file.path)
-        print(text)
         if not text:
             return Response({"error": "Error processing resume"}, status=500)
 
@@ -379,7 +363,6 @@ def recommend_jobs(request, username):
         user_education = extract_education(text, education)
         # user_job_title=Job.objects.get(id=request.user.job.id)
         user_qualification = f"{user_skill} {user_education}".strip()
-        print(user_qualification+ "qualifications")
 
         if not user_qualification:
             return Response({"error": "No qualifications extracted from resume"}, status=400)
@@ -433,10 +416,7 @@ def recommend_jobs(request, username):
         top_jobs = top_jobs.drop_duplicates(subset=['Job Title'])
         
         # Log some information for debugging
-        print(f"User qualification length: {len(user_qualification.split())}")
-        print(f"User TF-IDF terms: {len(user_tfidf)}")
-        print(f"Number of job descriptions: {len(job_descriptions)}")
-        print(f"Top similarity score: {top_jobs['Similarity'].max()}")
+     
         
         # Return top jobs (limited to 10)
         return JsonResponse({
@@ -505,7 +485,6 @@ def ats_score_computation(request):
         jobs_skill = extract_skills(job_description, skills)
         jobs_education = extract_education(job_description, education)
         jobs_qualification = f"{jobs_skill} {jobs_education}".strip()
-        print("line 293", jobs_qualification)
         cleaned_job_description = preprocess_text(jobs_qualification)
         job_tf = compute_tf_ats(cleaned_job_description)
 
@@ -530,7 +509,6 @@ def apply_job(request, id):
     # Check if user exists
     try:
         user = CustomUser.objects.get(username=request.user.username)
-        print(user)
     except CustomUser.DoesNotExist:
         return Response({"error": "User not found"}, status=404)
     # Check if job exists
@@ -558,7 +536,7 @@ def applied_job(request):
     applied_jobs = SavedJob.objects.filter(user=user).select_related("job")
 
     if not applied_jobs.exists():
-        return Response({"message": f"{user.username} has no applied jobs"}, status=200)
+        return Response({"username": f"{user.username}","applied_jobs":[]}, status=200)
 
     jobs_data = [
         {
@@ -574,52 +552,47 @@ def applied_job(request):
     ]
 
     return Response({"username": user.username, "applied_jobs": jobs_data})  # Fixed closing parenthesis
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])  # Ensure user is logged in
-def save_applied_job(request, job_id):
-    """Save a job after a user applies to it"""
-    user = request.user  # Get the logged-in user
-    job = get_object_or_404(Job, id=job_id)  # Get job or return 404
 
-    # Check if the job is already saved
-    if SavedJob.objects.filter(user=user, job=job).exists():
-        return Response({"message": "Job already saved"}, status=status.HTTP_200_OK)
-
-    # Save the job
-    saved_job = SavedJob.objects.create(user=user, job=job)
-    serializer = SavedJobSerializer(saved_job)  # Serialize the saved job
-
-    return Response(
-        {
-            "message": f"Job '{job.job_title}' saved successfully.",
-            "saved_job": serializer.data
-        },
-        status=status.HTTP_201_CREATED
-    )
+from django.utils import timezone
+from decimal import Decimal
 @api_view(['POST', 'GET'])
-@permission_classes([IsAuthenticated])  # Ensures only logged-in users can access this
+@permission_classes([IsAuthenticated])
 def recommend_save_job(request):
-    user = request.user  # Django handles authentication; no need to fetch manually
+    user = request.user  # Authenticated user
 
     if request.method == 'POST':
         required_fields = ['job_title', 'job_description', 'company_name', 'work_type', 'job_requirements', 'salary', 'location']
+        
+        # Ensure all required fields are in the request data
         if not all(field in request.data for field in required_fields):
             return Response({"error": "All fields are required"}, status=400)
 
-        save_job = SavedJob.objects.create(
-            user=user,  # Assuming there's a ForeignKey to CustomUser
-            job_title=request.data['job_title'],
-            job_description=request.data['job_description'],
+        # Step 1: Create a job entry (assuming recommended jobs are stored in the Job table)
+        recommended_job = Job.objects.create(
+            recruiter = Recruiter.objects.get(username="SrijanGhimire"),  # Recommended jobs might not have a recruiter
             company_name=request.data['company_name'],
-            job_type=request.data['work_type'],
-            job_requirements=request.data['job_requirements'],
-            salary=request.data['salary'],
             location=request.data['location'],
+            job_title=request.data['job_title'],
+          salary = Decimal(request.data['salary']),
+            job_type=request.data['work_type'],
+            job_description=request.data['job_description'],
+            job_requirements=request.data['job_requirements'],
+            expiry_time=timezone.now() ,  # Default expiry time
+            is_active=True
         )
-        return Response({"message": "Job saved successfully"}, status=201)
+
+        # Step 2: Save the newly created job for the user
+        saved_job = SavedJob.objects.create(
+            user=user,
+            job=recommended_job,
+            status="In Review"
+        )
+
+        return Response({"message": "Job recommended and saved successfully"}, status=201)
 
     elif request.method == 'GET':
-        saved_jobs = SavedJob.objects.filter(user=user).values(
-            "id", "job_title", "job_description", "company_name", "job_type", "job_requirements", "salary", "location"
+        saved_jobs = SavedJob.objects.filter(user=user).select_related('job').values(
+            "id", "job__job_title", "job__job_description", "job__company_name",
+            "job__job_type", "job__job_requirements", "job__salary", "job__location"
         )
         return Response({"saved_jobs": list(saved_jobs)}, status=200)

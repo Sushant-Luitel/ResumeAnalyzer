@@ -1,25 +1,23 @@
-import { Routes, Route, useLocation } from "react-router-dom";
-import Navbar from "./components/Navbar/Navbar";
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "./components/Layouts/MainLayout";
 import Register from "./components/auth/Register/Register";
+import Login from "./components/auth/Login/Login";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Home from "./pages/Home";
 import RecommendJob from "./components/RecommendJob/RecommendJob";
 import CalculateATS from "./components/CalculateATS/CalculateATS";
 import AppliedJobsPage from "./components/AppliedJobs/AppliedJobs";
-import Login from "./components/auth/Login/Login";
 import JobDetails from "./components/JobDetails/JobDetails";
 
 export const Layout = () => {
-  const location = useLocation();
-  const hideNavbar =
-    location.pathname === "/login" || location.pathname === "/register";
-
   return (
-    <>
-      {!hideNavbar && <Navbar />}
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <Routes>
+      {/* Routes without MainLayout (Login and Register) */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Routes with MainLayout (Protected routes) */}
+      <Route element={<MainLayout />}>
         <Route
           path="/"
           element={
@@ -37,7 +35,7 @@ export const Layout = () => {
           }
         />
         <Route
-          path="/calculate-ats"
+          path="/profile"
           element={
             <ProtectedRoute>
               <CalculateATS />
@@ -45,7 +43,7 @@ export const Layout = () => {
           }
         />
         <Route
-          path="/recommend-job"
+          path="/personalized-jobs"
           element={
             <ProtectedRoute>
               <RecommendJob />
@@ -53,14 +51,14 @@ export const Layout = () => {
           }
         />
         <Route
-          path="/applied-jobs"
+          path="/applications"
           element={
             <ProtectedRoute>
               <AppliedJobsPage />
             </ProtectedRoute>
           }
         />
-      </Routes>
-    </>
+      </Route>
+    </Routes>
   );
 };

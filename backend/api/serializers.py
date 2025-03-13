@@ -57,7 +57,6 @@ class JobSerializer(serializers.ModelSerializer):
         fields=['id','recruiter','company_name','location','job_title','salary','job_type','job_description','job_requirements','expiry_time']
     def create(self, validated_data):
         recruiter = self.context['request'].user 
-        print(recruiter.username)
         # if not isinstance(recruiter, Recruiter):
         #     raise serializers.ValidationError({"recruiter": "Only recruiters can post jobs."}) # Assuming the recruiter is the logged-in user
         # validated_data['recruiter'] = recruiter 
